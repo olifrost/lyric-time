@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lyrics to SRT Converter</title>
+    <link rel="stylesheet" href="src/styles.css">
+</head>
+<body>
+    <h1>Lyrics to SRT Converter</h1>
+    
+    <div class="container">
+        <input type="file" id="audioFile" accept="audio/*,.srt">
+        <div class="textarea-container">
+            <textarea id="lyricsInput" rows="10" placeholder="Paste your lyrics here (one line per subtitle)"></textarea>
+            <button id="lyricTidyBtn" class="tidy-toggle">🧹</button>
+        </div>
+        
+        <div class="buttons">
+            <button id="startBtn" disabled>Start Timing</button>
+            <button id="downloadBtn" disabled>Download SRT</button>
+            <button id="downloadFCPXMLBtn" disabled>Download FCP XML</button>
+            <button id="settingsBtn" class="settings-toggle">⚙️</button>
+        </div>
+        
+        <div id="settingsPanel" class="settings-panel hidden">
+            <h3>FCPXML Settings</h3>
+            <div class="setting-item">
+                <label for="fontFamily">Font:</label>
+                <input type="text" id="fontFamily" value="Helvetica" placeholder="Enter font name">
+            </div>
+            <div class="setting-item">
+                <label for="charsPerLine">Characters per line:</label>
+                <input type="number" id="charsPerLine" value="20" min="10" max="100">
+            </div>
+            <div class="setting-item">
+                <label for="fontSize">Font Size:</label>
+                <input type="number" id="fontSize" value="60" min="1" max="200">
+            </div>
+            <div class="setting-item">
+                <label for="fontColor">Font Color:</label>
+                <input type="color" id="fontColor" value="#ffffff">
+            </div>
+        </div>
+        
+        <div id="lyricTidyPanel" class="settings-panel hidden">
+            <h3>Lyric Tidy Settings</h3>
+            <div class="setting-item">
+                <label><input type="checkbox" id="removeHeaders" checked> Remove Section Headers (## Text)</label>
+            </div>
+            <div class="setting-item">
+                <label><input type="checkbox" id="removeMarkdown" checked> Remove Markdown Formatting</label>
+            </div>
+            <div class="setting-item">
+                <label><input type="checkbox" id="removeExtraSpaces" checked> Remove Extra Line Spaces</label>
+            </div>
+            <div class="setting-item">
+                <label><input type="checkbox" id="removePeriods" checked> Remove Periods</label>
+            </div>
+            <div class="setting-item">
+                <label><input type="checkbox" id="removeCommas" checked> Remove Commas</label>
+            </div>
+            <div class="setting-item">
+                <label><input type="checkbox" id="smartQuotes" checked> Use Smart Quotes</label>
+            </div>
+            <div class="setting-item">
+                <label><input type="checkbox" id="capitalizeLines"> Capitalize Lines</label>
+            </div>
+            <div class="setting-item">
+                <label><input type="checkbox" id="standardizeQuotes"> Standardize Quotes</label>
+            </div>
+            <div class="setting-item">
+                <label><input type="checkbox" id="removeParentheses"> Remove Parentheses</label>
+            </div>
+            <div class="setting-item">
+                <label><input type="checkbox" id="removeEmojis"> Remove Emojis</label>
+            </div>
+            <div class="setting-item">
+                <label><input type="checkbox" id="smartLineSplit"> Split Long Lines</label>
+                <input type="number" id="maxChars" value="45" min="20" max="100">
+                <span>characters</span>
+            </div>
+            <div class="setting-item find-replace">
+                <label>Find and Replace:</label>
+                <input type="text" id="findText" placeholder="Find">
+                <input type="text" id="replaceText" placeholder="Replace">
+            </div>
+            <div class="button-group">
+                <button id="processLyricsBtn">Process Lyrics</button>
+                <button id="undoBtn" disabled>Undo</button>
+            </div>
+        </div>
+        
+        <audio id="audio" controls style="display: none;"></audio>
+        <div id="lyricsDisplay"></div>
+    </div>
+
+    <script src="src/fcpxml.js" type="module"></script>
+    <script src="src/lyricProcessor.js" type="module"></script>
+    <script src="src/script.js" type="module"></script>
+</body>
+</html>
