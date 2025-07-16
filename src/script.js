@@ -15,7 +15,36 @@ const downloadFCPXMLBtn = document.getElementById('downloadFCPXMLBtn');
 const lyricTidyBtn = document.getElementById('lyricTidyBtn');
 const lyricTidyPanel = document.getElementById('lyricTidyPanel');
 const audioFileInput = document.getElementById('audioFile');
+
 let advancedSRTMode = false;
+
+// Tooltip for timing keys
+let timingTooltip = null;
+function showTimingTooltip() {
+    if (!timingTooltip) {
+        timingTooltip = document.createElement('div');
+        timingTooltip.id = 'timingTooltip';
+        timingTooltip.style.position = 'fixed';
+        timingTooltip.style.top = '70px';
+        timingTooltip.style.left = '50%';
+        timingTooltip.style.transform = 'translateX(-50%)';
+        timingTooltip.style.background = 'rgba(30,30,30,0.92)';
+        timingTooltip.style.color = '#fff';
+        timingTooltip.style.padding = '6px 18px';
+        timingTooltip.style.borderRadius = '6px';
+        timingTooltip.style.fontSize = '0.95rem';
+        timingTooltip.style.zIndex = 9999;
+        timingTooltip.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+        timingTooltip.style.opacity = '0.92';
+        timingTooltip.style.pointerEvents = 'none';
+        document.body.appendChild(timingTooltip);
+    }
+    timingTooltip.textContent = 'Press Space or Enter to time each lyric';
+    timingTooltip.style.display = 'block';
+}
+function hideTimingTooltip() {
+    if (timingTooltip) timingTooltip.style.display = 'none';
+}
 
 document.getElementById('audioFile').addEventListener('change', (e) => {
     const file = e.target.files[0];
@@ -30,7 +59,6 @@ startBtn.addEventListener('click', () => {
         alert('Please upload an audio track first');
         return;
     }
-    
     if (isTimingActive) {
         // Reset functionality
         isTimingActive = false;
@@ -42,11 +70,11 @@ startBtn.addEventListener('click', () => {
         downloadBtn.disabled = true;
         downloadFCPXMLBtn.disabled = true;
         displayLyrics();
+        hideTimingTooltip();
     } else {
         // Start timing functionality
         lyrics = lyricsInput.value.split('\n').filter(line => line.trim());
         if (lyrics.length === 0) return;
-        
         isTimingActive = true;
         currentLine = 0;
         timings = [];
@@ -55,26 +83,25 @@ startBtn.addEventListener('click', () => {
         audioElement.style.display = 'block';
         // Show first line as upcoming
         document.getElementById('line0').classList.add('next-line');
+        showTimingTooltip();
     }
 });
 
 document.addEventListener('keydown', (e) => {
-    if (e.code === 'Space' && isTimingActive && !e.repeat) {
+    if ((e.code === 'Space' || e.code === 'Enter') && isTimingActive && !e.repeat) {
         e.preventDefault();
         if (currentLine < lyrics.length) {
             audioElement.play();
-            timings[currentLine] = { 
+            timings[currentLine] = {
                 start: audioElement.currentTime,
                 text: lyrics[currentLine]
             };
-            
             // Mark previous line as completed
             if (currentLine > 0) {
                 const previousElement = document.getElementById(`line${currentLine - 1}`);
                 previousElement.classList.remove('highlight');
                 previousElement.classList.add('completed');
             }
-            
             // Highlight current line
             const currentElement = document.getElementById(`line${currentLine}`);
             currentElement.classList.remove('next-line');
@@ -84,22 +111,21 @@ document.addEventListener('keydown', (e) => {
 });
 
 document.addEventListener('keyup', (e) => {
-    if (e.code === 'Space' && isTimingActive) {
+    if ((e.code === 'Space' || e.code === 'Enter') && isTimingActive) {
         e.preventDefault();
         if (currentLine < lyrics.length) {
             timings[currentLine].end = audioElement.currentTime;
-            
             // Keep current line highlighted and show next line as upcoming
             if (currentLine + 1 < lyrics.length) {
                 document.getElementById(`line${currentLine + 1}`).classList.add('next-line');
             }
             currentLine++;
-            
             if (currentLine >= lyrics.length) {
                 isTimingActive = false;
                 downloadBtn.disabled = false;
                 downloadFCPXMLBtn.disabled = false;
                 audioElement.pause();
+                hideTimingTooltip();
             }
         }
     }
@@ -158,17 +184,17 @@ function displayLyrics() {
 
 function generateSRT() {
     const MIN_GAP = 0.25; // minimum gap in seconds
-    
+
     // Create a copy of timings to modify
     let processedTimings = [...timings];
-    
+
     // Process the timings to handle small gaps
     for (let i = 0; i < processedTimings.length - 1; i++) {
         const currentTiming = processedTimings[i];
         const nextTiming = processedTimings[i + 1];
-        
+
         const gap = nextTiming.start - currentTiming.end;
-        
+
         if (gap < MIN_GAP) {
             // Extend the current subtitle to the start of the next one
             currentTiming.end = nextTiming.start;
@@ -196,7 +222,7 @@ function formatTime(seconds) {
 processLyricsBtn.addEventListener('click', () => {
     // Save current state before processing
     previousLyrics = lyricsInput.value;
-    
+
     const options = {
         removeHeaders: document.getElementById('removeHeaders').checked,
         removeMarkdown: document.getElementById('removeMarkdown').checked,
@@ -215,7 +241,7 @@ processLyricsBtn.addEventListener('click', () => {
         find: document.getElementById('findText').value,
         replace: document.getElementById('replaceText').value
     };
-    
+
     lyricsInput.value = processLyrics(lyricsInput.value, options);
     document.getElementById('undoBtn').disabled = false;
     lyricTidyPanel.classList.add('hidden');
@@ -246,7 +272,7 @@ function parseSRT(srtText) {
 function srtTimeToSeconds(time) {
     const [h, m, sMs] = time.split(':');
     const [s, ms] = sMs.split(',');
-    return parseInt(h)*3600 + parseInt(m)*60 + parseInt(s) + parseInt(ms)/1000;
+    return parseInt(h) * 3600 + parseInt(m) * 60 + parseInt(s) + parseInt(ms) / 1000;
 }
 
 // Advanced SRT upload: Option/Alt+file select or drop
@@ -260,7 +286,7 @@ audioFileInput.addEventListener('change', (e) => {
     if (file.name.toLowerCase().endsWith('.srt')) {
         // Advanced SRT mode
         const reader = new FileReader();
-        reader.onload = function(ev) {
+        reader.onload = function (ev) {
             const srtText = ev.target.result;
             const srtTimings = parseSRT(srtText);
             if (srtTimings.length === 0) {
@@ -298,7 +324,7 @@ document.addEventListener('drop', (e) => {
         const file = e.dataTransfer.files[0];
         if (file.name.toLowerCase().endsWith('.srt')) {
             const reader = new FileReader();
-            reader.onload = function(ev) {
+            reader.onload = function (ev) {
                 const srtText = ev.target.result;
                 const srtTimings = parseSRT(srtText);
                 if (srtTimings.length === 0) {
