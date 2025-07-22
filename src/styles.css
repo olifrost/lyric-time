@@ -1,82 +1,126 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+/* Custom styles to complement Tailwind */
 
-body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    max-width: 800px;
-    margin: 40px auto;
-    padding: 20px;
-    background: #fafafa;
-    color: #1d1d1f;
+/* Tab switching */
+.timing-mode {
+    display: none;
+}
+
+.timing-mode.active {
+    display: block;
+}
+
+/* Lyric display styles */
+.lyric-line {
+    padding: 12px 16px;
+    margin: 8px 0;
+    border-radius: 8px;
+    font-size: 16px;
     line-height: 1.5;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
 }
 
-h1 {
-    text-align: center;
+.lyric-line.next-line {
+    background: #dbeafe;
+    border-color: #93c5fd;
+}
+
+.lyric-line.highlight {
+    background: #3b82f6;
+    color: white;
     font-weight: 600;
-    font-size: 28px;
-    margin-bottom: 40px;
-    color: #000;
 }
 
-.container {
-    background: white;
-    padding: 40px;
-    border-radius: 16px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+.lyric-line.completed {
+    background: #f3f4f6;
+    color: #6b7280;
 }
 
-#audioFile {
-    width: 100%;
-    margin-bottom: 20px;
-    padding: 20px;
-    border: 2px dashed #e2e2e7;
+/* Word timing styles */
+.word-lyric-line {
+    font-size: 18px;
+    margin: 16px 0;
+    padding: 12px 16px;
     border-radius: 8px;
-    transition: border-color 0.2s;
-    max-width: 100%;
-    box-sizing: border-box;
-    margin-bottom: 10px;
+    line-height: 1.6;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
 }
 
-#audioFile:hover {
-    border-color: #0071e3;
+.word-lyric-line.current {
+    background: #dbeafe;
+    border-color: #3b82f6;
 }
 
-#audioFileWord {
-    width: 100%;
-    margin-bottom: 20px;
-    padding: 20px;
-    border: 2px dashed #e2e2e7;
-    border-radius: 8px;
-    transition: border-color 0.2s;
-    max-width: 100%;
-    box-sizing: border-box;
-    margin-bottom: 10px;
+.word-lyric-line.completed {
+    opacity: 0.6;
+    background: #f9fafb;
 }
 
-#audioFileWord:hover {
-    border-color: #0071e3;
+.word-lyric-line .word {
+    margin-right: 6px;
+    padding: 4px 6px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 2px solid transparent;
 }
 
-#lyricsInput {
-    width: 100%;
-    padding: 16px;
-    border: 1px solid #e2e2e7;
-    border-radius: 8px;
-    font-family: inherit;
-    margin-bottom: 20px;
-    resize: vertical;
-    box-sizing: border-box;
+/* Next word to time - subtle blue border */
+.word-lyric-line .word.current-word {
+    border: 2px solid #93c5fd;
+    background: #eff6ff;
+    animation: pulse-border 2s infinite;
 }
 
-#lyricsInputWord {
-    width: 100%;
-    padding: 16px;
-    border: 1px solid #e2e2e7;
-    border-radius: 8px;
-    font-family: inherit;
-    margin-bottom: 20px;
-    resize: vertical;
-    box-sizing: border-box;
+@keyframes pulse-border {
+    0%, 100% { 
+        border-color: #93c5fd;
+        background: #eff6ff;
+    }
+    50% { 
+        border-color: #3b82f6;
+        background: #dbeafe;
+    }
+}
+
+/* Completed word - highlighted in chosen color */
+.word-lyric-line .word.completed-word {
+    background: var(--highlight-color, #3b82f6);
+    color: white;
+    font-weight: 600;
+    border: 2px solid var(--highlight-color, #3b82f6);
+}
+
+/* Custom audio player styles */
+audio {
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.1));
+}
+
+/* Modal backdrop styles */
+.fixed.inset-0 {
+    backdrop-filter: blur(4px);
+}
+
+/* File input hover states */
+input[type="file"]:hover {
+    background: #f9fafb;
+}
+
+/* Ensure proper spacing and layout */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Clean up any remaining old styles */
+.container,
+.mode-tabs,
+.tab-button,
+.buttons,
+.settings-panel,
+.word-timing-info,
+.download-section {
+    /* Remove old styles - now handled by Tailwind */
 }
     box-sizing: border-box;
     font-size: 15px;

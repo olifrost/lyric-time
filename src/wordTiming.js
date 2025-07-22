@@ -345,9 +345,7 @@ export class WordTiming {
             // Create subtitle entries for progressive highlighting
             for (let wordIndex = 0; wordIndex < lineTimings.length; wordIndex++) {
                 const startTime = lineTimings[wordIndex].startTime;
-                const endTime = wordIndex < lineTimings.length - 1 ? 
-                    lineTimings[wordIndex + 1].startTime : 
-                    startTime + 2.0;
+                const endTime = this.calculateEndTime(lineIndex, wordIndex, lineGroups, lineTimings);
                 
                 // Build the line with current word highlighted using Caption Burner format
                 const formattedLine = line.map((word, idx) => {
@@ -378,6 +376,25 @@ export class WordTiming {
         const frames = Math.floor((seconds - totalSeconds) * 25); // 25fps
         
         return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}:${String(frames).padStart(2, '0')}`;
+    }
+    
+    // Utility function to calculate proper end times without overlaps
+    calculateEndTime(lineIndex, wordIndex, lineGroups, lineTimings) {
+        if (wordIndex < lineTimings.length - 1) {
+            // End just before the next word starts
+            return lineTimings[wordIndex + 1].startTime - 0.01;
+        } else {
+            // Last word of the line - check if there's a next line
+            const nextLineIndex = lineIndex + 1;
+            const nextLineTimings = lineGroups[nextLineIndex.toString()];
+            if (nextLineTimings && nextLineTimings[0]) {
+                // End just before the first word of next line
+                return nextLineTimings[0].startTime - 0.01;
+            } else {
+                // Very last word - add reasonable duration
+                return lineTimings[wordIndex].startTime + 1.5;
+            }
+        }
     }
     
     generateSRT() {

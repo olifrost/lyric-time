@@ -21,19 +21,23 @@ function initializeTabs() {
     const wordTimingMode = document.getElementById('wordTimingMode');
     
     lineTimingTab.addEventListener('click', () => {
-        // Switch to line timing mode
-        lineTimingTab.classList.add('active');
-        wordTimingTab.classList.remove('active');
-        lineTimingMode.classList.add('active');
-        wordTimingMode.classList.remove('active');
+        // Update tab appearance
+        lineTimingTab.className = 'flex-1 py-3 px-6 text-sm font-medium text-primary border-b-2 border-primary bg-primary/5 rounded-tl-lg';
+        wordTimingTab.className = 'flex-1 py-3 px-6 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-gray-700 rounded-tr-lg';
+        
+        // Switch content
+        lineTimingMode.classList.remove('hidden');
+        wordTimingMode.classList.add('hidden');
     });
     
     wordTimingTab.addEventListener('click', () => {
-        // Switch to word timing mode
-        wordTimingTab.classList.add('active');
-        lineTimingTab.classList.remove('active');
-        wordTimingMode.classList.add('active');
-        lineTimingMode.classList.remove('active');
+        // Update tab appearance  
+        wordTimingTab.className = 'flex-1 py-3 px-6 text-sm font-medium text-primary border-b-2 border-primary bg-primary/5 rounded-tr-lg';
+        lineTimingTab.className = 'flex-1 py-3 px-6 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-gray-700 rounded-tl-lg';
+        
+        // Switch content
+        wordTimingMode.classList.remove('hidden');
+        lineTimingMode.classList.add('hidden');
     });
 }
 
@@ -207,13 +211,26 @@ downloadFCPXMLBtn.addEventListener('click', () => {
 
 lyricTidyBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    lyricTidyPanel.classList.toggle('hidden');
+    document.getElementById('lyricTidyPanel').classList.remove('hidden');
 });
 
-// Hide panel when clicking outside
+// Settings button
+document.getElementById('settingsBtn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.getElementById('settingsPanel').classList.remove('hidden');
+});
+
+// Hide panels when clicking outside
 document.addEventListener('click', (e) => {
-    if (!lyricTidyPanel.contains(e.target) && !lyricTidyBtn.contains(e.target)) {
+    const lyricTidyPanel = document.getElementById('lyricTidyPanel');
+    const settingsPanel = document.getElementById('settingsPanel');
+    
+    if (lyricTidyPanel && !lyricTidyPanel.querySelector('.bg-white').contains(e.target) && !lyricTidyBtn.contains(e.target)) {
         lyricTidyPanel.classList.add('hidden');
+    }
+    
+    if (settingsPanel && !settingsPanel.querySelector('.bg-white').contains(e.target) && !document.getElementById('settingsBtn').contains(e.target)) {
+        settingsPanel.classList.add('hidden');
     }
 });
 
