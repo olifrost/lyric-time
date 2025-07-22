@@ -17,6 +17,7 @@ const lyricTidyPanel = document.getElementById('lyricTidyPanel');
 const audioFileInput = document.getElementById('audioFile');
 
 let advancedSRTMode = false;
+let audioBaseFilename = 'subtitles';
 
 // Tooltip for timing keys
 let timingTooltip = null;
@@ -39,7 +40,7 @@ function showTimingTooltip() {
         timingTooltip.style.pointerEvents = 'none';
         document.body.appendChild(timingTooltip);
     }
-    timingTooltip.textContent = 'Press Space or Enter to time each lyric';
+    timingTooltip.textContent = 'Press Enter to time each lyric';
     timingTooltip.style.display = 'block';
 }
 function hideTimingTooltip() {
@@ -49,6 +50,10 @@ function hideTimingTooltip() {
 document.getElementById('audioFile').addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (file) {
+        // Extract base filename (without extension)
+        const name = file.name;
+        const dotIdx = name.lastIndexOf('.');
+        audioBaseFilename = dotIdx > 0 ? name.substring(0, dotIdx) : name;
         audioElement.src = URL.createObjectURL(file);
         startBtn.disabled = false;
     }
@@ -106,6 +111,13 @@ document.addEventListener('keydown', (e) => {
             const currentElement = document.getElementById(`line${currentLine}`);
             currentElement.classList.remove('next-line');
             currentElement.classList.add('highlight');
+            // Smooth scroll by the height of one lyric line
+            setTimeout(() => {
+                const lyricLine = document.getElementById(`line${currentLine}`);
+                if (lyricLine) {
+                    lyricLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 0);
         }
     }
 });
@@ -137,7 +149,7 @@ downloadBtn.addEventListener('click', () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'subtitles.srt';
+    a.download = `${audioBaseFilename} Titles.srt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -151,7 +163,7 @@ downloadFCPXMLBtn.addEventListener('click', () => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'subtitles.fcpxml';
+        a.download = `${audioBaseFilename} Titles.fcpxml`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -310,6 +322,10 @@ audioFileInput.addEventListener('change', (e) => {
         return;
     }
     // Audio file mode
+    // Extract base filename (without extension)
+    const name = file.name;
+    const dotIdx = name.lastIndexOf('.');
+    audioBaseFilename = dotIdx > 0 ? name.substring(0, dotIdx) : name;
     audioElement.src = URL.createObjectURL(file);
     startBtn.disabled = false;
 });
