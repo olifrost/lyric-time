@@ -1,10 +1,41 @@
 import { processLyrics } from './lyricProcessor.js';
+import { WordTiming } from './wordTiming.js';
 
 let lyrics = [];
 let currentLine = 0;
 let timings = [];
 let isTimingActive = false;
 let previousLyrics = null;
+let wordTiming = null;
+
+// Initialize word timing when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    wordTiming = new WordTiming();
+    initializeTabs();
+});
+
+function initializeTabs() {
+    const lineTimingTab = document.getElementById('lineTimingTab');
+    const wordTimingTab = document.getElementById('wordTimingTab');
+    const lineTimingMode = document.getElementById('lineTimingMode');
+    const wordTimingMode = document.getElementById('wordTimingMode');
+    
+    lineTimingTab.addEventListener('click', () => {
+        // Switch to line timing mode
+        lineTimingTab.classList.add('active');
+        wordTimingTab.classList.remove('active');
+        lineTimingMode.classList.add('active');
+        wordTimingMode.classList.remove('active');
+    });
+    
+    wordTimingTab.addEventListener('click', () => {
+        // Switch to word timing mode
+        wordTimingTab.classList.add('active');
+        lineTimingTab.classList.remove('active');
+        wordTimingMode.classList.add('active');
+        lineTimingMode.classList.remove('active');
+    });
+}
 
 const audioElement = document.getElementById('audio');
 const lyricsInput = document.getElementById('lyricsInput');

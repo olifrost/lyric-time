@@ -10,17 +10,48 @@
     <h1>Lyrics to SRT Converter</h1>
     
     <div class="container">
-        <input type="file" id="audioFile" accept="audio/*,.srt">
-        <div class="textarea-container">
-            <textarea id="lyricsInput" rows="10" placeholder="Paste your lyrics here (one line per subtitle)"></textarea>
-            <button id="lyricTidyBtn" class="tidy-toggle">🧹</button>
+        <!-- Mode Toggle Tabs -->
+        <div class="mode-tabs">
+            <button id="lineTimingTab" class="tab-button active">Line Timing</button>
+            <button id="wordTimingTab" class="tab-button">Word Timing</button>
         </div>
-        
-        <div class="buttons">
-            <button id="startBtn" disabled>Start Timing</button>
-            <button id="downloadBtn" disabled>Download SRT</button>
-            <button id="downloadFCPXMLBtn" disabled>Download FCP XML</button>
-            <button id="settingsBtn" class="settings-toggle">⚙️</button>
+
+        <!-- Line Timing Mode (existing functionality) -->
+        <div id="lineTimingMode" class="timing-mode active">
+            <input type="file" id="audioFile" accept="audio/*,.srt">
+            <div class="textarea-container">
+                <textarea id="lyricsInput" rows="10" placeholder="Paste your lyrics here (one line per subtitle)"></textarea>
+                <button id="lyricTidyBtn" class="tidy-toggle">🧹</button>
+            </div>
+            
+            <div class="buttons">
+                <button id="startBtn" disabled>Start Timing</button>
+                <button id="downloadBtn" disabled>Download SRT</button>
+                <button id="downloadFCPXMLBtn" disabled>Download FCP XML</button>
+                <button id="settingsBtn" class="settings-toggle">⚙️</button>
+            </div>
+        </div>
+
+        <!-- Word Timing Mode (new functionality) -->
+        <div id="wordTimingMode" class="timing-mode">
+            <input type="file" id="audioFileWord" accept="audio/*">
+            <div class="textarea-container">
+                <textarea id="lyricsInputWord" rows="10" placeholder="Paste your lyrics here (one line per subtitle)"></textarea>
+            </div>
+            
+            <div class="buttons">
+                <button id="startWordBtn" disabled>Start Word Timing</button>
+                <button id="downloadWordBtn" disabled>Download ITT</button>
+                <button id="downloadWordSRTBtn" disabled>Download SRT</button>
+            </div>
+            
+            <div class="word-timing-info">
+                <p><strong>Instructions:</strong> Press Enter as each word starts. The current word will be highlighted in red.</p>
+                <div class="highlight-color-picker">
+                    <label for="highlightColor">Highlight Color:</label>
+                    <input type="color" id="highlightColor" value="#ff0000">
+                </div>
+            </div>
         </div>
         
         <div id="settingsPanel" class="settings-panel hidden">
@@ -92,11 +123,14 @@
         </div>
         
         <audio id="audio" controls style="display: none;"></audio>
+        <audio id="audioWord" controls style="display: none;"></audio>
         <div id="lyricsDisplay"></div>
+        <div id="wordLyricsDisplay"></div>
     </div>
 
     <script src="src/fcpxml.js" type="module"></script>
     <script src="src/lyricProcessor.js" type="module"></script>
+    <script src="src/wordTiming.js" type="module"></script>
     <script src="src/script.js" type="module"></script>
 </body>
 </html>

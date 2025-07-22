@@ -217,3 +217,115 @@ button:disabled {
 #undoBtn:disabled {
     background: #e2e2e7;
 }
+
+/* Mode Tabs */
+.mode-tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #e2e2e7;
+}
+
+.tab-button {
+    background: none;
+    border: none;
+    padding: 12px 24px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    color: #666;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+}
+
+.tab-button:hover {
+    color: #0071e3;
+}
+
+.tab-button.active {
+    color: #0071e3;
+    border-bottom-color: #0071e3;
+}
+
+/* Timing Modes */
+.timing-mode {
+    display: none;
+}
+
+.timing-mode.active {
+    display: block;
+}
+
+/* Word Timing Specific Styles */
+.word-timing-info {
+    margin-top: 16px;
+    padding: 16px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    border-left: 4px solid #0071e3;
+}
+
+.word-timing-info p {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+}
+
+.highlight-color-picker {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.highlight-color-picker label {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.highlight-color-picker input[type="color"] {
+    width: 40px;
+    height: 30px;
+    border: 1px solid #e2e2e7;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* Word Timing Display */
+#wordLyricsDisplay {
+    margin-top: 20px;
+}
+
+.word-lyric-line {
+    font-size: 18px;
+    margin: 12px 0;
+    padding: 8px;
+    border-radius: 4px;
+    line-height: 1.4;
+}
+
+.word-lyric-line.current {
+    background: #f0f8ff;
+    border-left: 4px solid #0071e3;
+}
+
+.word-lyric-line.completed {
+    opacity: 0.6;
+}
+
+.word-lyric-line .word {
+    margin-right: 4px;
+    padding: 2px 4px;
+    border-radius: 3px;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.word-lyric-line .word.current-word {
+    background: var(--highlight-color, #ff0000);
+    color: white;
+    font-weight: bold;
+}
+
+.word-lyric-line .word.completed-word {
+    background: #e8f5e8;
+    border: 1px solid #4caf50;
+}
