@@ -41,15 +41,28 @@
             
             <div class="buttons">
                 <button id="startWordBtn" disabled>Start Word Timing</button>
-                <button id="downloadWordBtn" disabled>Download ITT</button>
-                <button id="downloadWordSRTBtn" disabled>Download SRT</button>
             </div>
             
             <div class="word-timing-info">
-                <p><strong>Instructions:</strong> Press Enter as each word starts. The current word will be highlighted in red.</p>
-                <div class="highlight-color-picker">
-                    <label for="highlightColor">Highlight Color:</label>
-                    <input type="color" id="highlightColor" value="#ff0000">
+                <p><strong>Instructions:</strong> Press <kbd>Enter</kbd> as each word starts. The word with the yellow border is next to be timed.</p>
+                <div class="controls-row">
+                    <div class="highlight-color-picker">
+                        <label for="highlightColor">Highlight Color:</label>
+                        <input type="color" id="highlightColor" value="#ff6b35">
+                    </div>
+                    <div class="playback-controls">
+                        <button id="playPauseBtn" class="control-btn" disabled>▶️ Play</button>
+                        <button id="rewindBtn" class="control-btn" disabled>⏪ -5s</button>
+                    </div>
+                </div>
+                <div id="timingProgress" class="timing-progress hidden">
+                    <div class="progress-text">
+                        <span id="progressText">Progress: 0 / 0 words</span>
+                        <span id="currentLineText">Line 1 of 1</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="progressFill" class="progress-fill"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -126,6 +139,17 @@
         <audio id="audioWord" controls style="display: none;"></audio>
         <div id="lyricsDisplay"></div>
         <div id="wordLyricsDisplay"></div>
+        
+        <!-- Word timing download buttons (shown after timing) -->
+        <div id="wordDownloadButtons" class="download-section hidden">
+            <h3>Download Word-Timed Subtitles</h3>
+            <div class="buttons">
+                <button id="downloadWordVTT">WebVTT</button>
+                <button id="downloadWordITT">ITT</button>
+                <button id="downloadWordASS">ASS</button>
+                <button id="downloadWordSRT">SRT</button>
+            </div>
+        </div>
     </div>
 
     <script src="src/fcpxml.js" type="module"></script>
