@@ -2,11 +2,11 @@
 
 /* Tab switching */
 .timing-mode {
-    display: none;
+    display: block;
 }
 
-.timing-mode.active {
-    display: block;
+.timing-mode.hidden {
+    display: none !important;
 }
 
 /* Lyric display styles */

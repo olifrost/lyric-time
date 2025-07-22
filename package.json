@@ -1,21 +1,24 @@
 {
-  "name": "lyrics-to-srt",
+  "name": "lyric-timing-studio",
   "version": "1.0.0",
-  "description": "A web application that converts lyrics into timed .srt files.",
-  "main": "src/app.ts",
+  "description": "A web application for timing lyrics to create word-by-word highlighted subtitles",
+  "type": "module",
   "scripts": {
-    "start": "ts-node src/app.ts",
-    "build": "tsc"
-  },
-  "dependencies": {
-    "express": "^4.17.1",
-    "typescript": "^4.5.4"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "devDependencies": {
-    "@types/node": "^16.11.7",
-    "@types/express": "^4.17.13",
-    "ts-node": "^10.4.0"
+    "@tailwindcss/forms": "^0.5.7",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.3.6",
+    "vite": "^5.0.8"
   },
   "author": "Your Name",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@tabler/icons": "^3.34.1",
+    "lucide": "^0.525.0"
+  }
 }

@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles for lyric display and word timing */
+.lyric-container {
+  @apply bg-gray-50 border border-gray-200 rounded-lg p-4 max-h-64 overflow-y-auto;
+}
+
+.current-word {
+  @apply bg-yellow-300 font-bold px-1 rounded transition-colors duration-200;
+}
+
+.completed-word {
+  @apply bg-green-200 px-1 rounded transition-colors duration-200;
+}
+
+.word-timing-item {
+  @apply flex justify-between items-center p-2 border-b border-gray-100 last:border-b-0 hover:bg-gray-50;
+}
+
+.audio-controls {
+  @apply w-full max-w-md mx-auto rounded-lg;
+}
+
+.audio-controls:not(.hidden) {
+  @apply block;
+}
+
+.time-display {
+  @apply font-mono text-sm bg-gray-100 px-2 py-1 rounded;
+}
+
+/* Modal styles */
+.modal-overlay {
+  @apply fixed inset-0 bg-black bg-opacity-50 z-50 p-4;
+  display: none !important;
+}
+
+.modal-overlay:not(.hidden) {
+  @apply flex items-center justify-center;
+  display: flex !important;
+}
+
+.modal-content {
+  @apply bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto;
+}
+
+/* Tab styles */
+.tab-button {
+  @apply px-6 py-3 font-medium text-sm rounded-t-lg transition-colors duration-200 border-b-2;
+}
+
+.tab-button.active {
+  @apply text-white bg-blue-600 border-blue-600;
+}
+
+.tab-button.inactive {
+  @apply text-gray-600 bg-white border-transparent hover:text-gray-900 hover:border-gray-300;
+}
+
+/* Word timing display */
+.timing-mode #wordTimingList {
+  @apply block;
+}
+
+.timing-mode #lyricList {
+  @apply hidden;
+}
+
+/* Icon styles */
+.icon {
+  @apply w-5 h-5 inline-block;
+}
+
+.icon-sm {
+  @apply w-4 h-4 inline-block;
+}
+
+.icon-lg {
+  @apply w-6 h-6 inline-block;
+}
+
+/* Button styles */
+.btn-primary {
+  @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center gap-2;
+}
+
+.btn-secondary {
+  @apply bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+}
+
+.btn-danger {
+  @apply bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+}
+
+.btn-success {
+  @apply bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+}

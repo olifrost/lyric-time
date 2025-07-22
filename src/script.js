@@ -21,9 +21,9 @@ function initializeTabs() {
     const wordTimingMode = document.getElementById('wordTimingMode');
     
     lineTimingTab.addEventListener('click', () => {
-        // Update tab appearance
-        lineTimingTab.className = 'flex-1 py-3 px-6 text-sm font-medium text-primary border-b-2 border-primary bg-primary/5 rounded-tl-lg';
-        wordTimingTab.className = 'flex-1 py-3 px-6 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-gray-700 rounded-tr-lg';
+        // Update tab appearance - Line timing active
+        lineTimingTab.className = 'flex-1 py-3 px-6 text-sm font-medium text-white bg-blue-600 border-b-2 border-blue-600 rounded-tl-lg transition-all';
+        wordTimingTab.className = 'flex-1 py-3 px-6 text-sm font-medium text-gray-600 bg-white border-b-2 border-transparent hover:bg-gray-50 rounded-tr-lg transition-all';
         
         // Switch content
         lineTimingMode.classList.remove('hidden');
@@ -31,9 +31,9 @@ function initializeTabs() {
     });
     
     wordTimingTab.addEventListener('click', () => {
-        // Update tab appearance  
-        wordTimingTab.className = 'flex-1 py-3 px-6 text-sm font-medium text-primary border-b-2 border-primary bg-primary/5 rounded-tr-lg';
-        lineTimingTab.className = 'flex-1 py-3 px-6 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-gray-700 rounded-tl-lg';
+        // Update tab appearance - Word timing active
+        wordTimingTab.className = 'flex-1 py-3 px-6 text-sm font-medium text-white bg-blue-600 border-b-2 border-blue-600 rounded-tr-lg transition-all';
+        lineTimingTab.className = 'flex-1 py-3 px-6 text-sm font-medium text-gray-600 bg-white border-b-2 border-transparent hover:bg-gray-50 rounded-tl-lg transition-all';
         
         // Switch content
         wordTimingMode.classList.remove('hidden');
