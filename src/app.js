@@ -902,7 +902,7 @@ Alpine.data('lyricApp', () => ({
                 // Build the line with current word highlighted using Caption Burner format
                 const formattedLine = line.map((word, idx) => {
                     if (idx === wordIndex) {
-                        return `<span tts:fontWeight="bold" tts:color="${rgbaColor}">${word}</span>`;
+                        return `<span tts:color="${rgbaColor}">${word}</span>`;
                     } else {
                         return word;
                     }
@@ -987,8 +987,15 @@ Alpine.data('lyricApp', () => ({
             const nextLineIndex = lineIndex + 1;
             const nextLineTimings = lineGroups[nextLineIndex.toString()];
             if (nextLineTimings && nextLineTimings[0]) {
-                // Allow a small gap between lines (0.1 seconds)
-                return nextLineTimings[0].startTime - 0.1;
+                const gapToNextLine = nextLineTimings[0].startTime - lineTimings[wordIndex].startTime;
+
+                // If the gap is very short (less than 1.5 seconds), connect seamlessly
+                // If it's a purposeful gap (1.5+ seconds), allow a small buffer (0.1s)
+                if (gapToNextLine < 1.5) {
+                    return nextLineTimings[0].startTime; // No gap
+                } else {
+                    return nextLineTimings[0].startTime - 0.1; // Small buffer for intentional gaps
+                }
             } else {
                 // Very last word - add reasonable duration
                 return lineTimings[wordIndex].startTime + 1.5;
