@@ -43,7 +43,7 @@
                 <label class="block text-sm font-medium text-gray-700">Lyrics</label>
                 <div class="flex gap-2">
                     <button @click="$refs.lyricsFileInput.click()"
-                        class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors" 
+                        class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                         title="Import lyrics from file">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -60,7 +60,7 @@
                     </button>
                 </div>
             </div>
-            <input type="file" x-ref="lyricsFileInput" @change="handleLyricsImport" accept=".txt,.srt,.lrc,.vtt" 
+            <input type="file" x-ref="lyricsFileInput" @change="handleLyricsImport" accept=".txt,.srt,.lrc,.vtt"
                 style="display: none;">
             <textarea x-model="lyrics" x-ref="lyricsInput" rows="8"
                 placeholder="Paste your lyrics here (one line per subtitle) or use the import button to load from a file"
@@ -93,38 +93,26 @@
 
                     <!-- Line Timing Instructions -->
                     <template x-if="mode === 'line'">
-                        <div class="text-sm text-gray-700 space-y-2">
-                            <p><strong>How to use:</strong></p>
-                            <ol class="list-decimal list-inside space-y-1 ml-2">
-                                <li>Press <kbd
-                                        class="px-2 py-1 bg-gray-100 border border-gray-300 rounded text-xs font-mono">Enter</kbd>
-                                    to start timing each line</li>
-                                <li>Hold <kbd
-                                        class="px-2 py-1 bg-gray-100 border border-gray-300 rounded text-xs font-mono">Enter</kbd>
-                                    for the duration of the line</li>
-                                <li>Release when the line ends</li>
-                            </ol>
-                            <p class="text-xs text-gray-500 mt-2">Use <kbd
+                        <div class="text-sm text-gray-700">
+                            <p>Hold <kbd
+                                    class="px-2 py-1 bg-gray-100 border border-gray-300 rounded text-xs font-mono">Enter</kbd>
+                                for each line duration</p>
+                            <p class="text-xs text-gray-500 mt-1">Use <kbd
                                     class="px-1.5 py-0.5 bg-gray-100 border border-gray-300 rounded text-xs font-mono">Space</kbd>
-                                to play/pause audio anytime</p>
+                                to play/pause</p>
                         </div>
                     </template>
 
                     <!-- Word Timing Instructions & Settings -->
                     <template x-if="mode === 'word'">
                         <div class="space-y-4">
-                            <div class="text-sm text-gray-700 space-y-2">
-                                <p><strong>How to use:</strong></p>
-                                <ol class="list-decimal list-inside space-y-1 ml-2">
-                                    <li>Press <kbd
-                                            class="px-2 py-1 bg-gray-100 border border-gray-300 rounded text-xs font-mono">Enter</kbd>
-                                        as each word starts</li>
-                                    <li>The current word will have a blue border</li>
-                                    <li>Continue until all words are timed</li>
-                                </ol>
-                                <p class="text-xs text-gray-500 mt-2">Use <kbd
+                            <div class="text-sm text-gray-700">
+                                <p>Press <kbd
+                                        class="px-2 py-1 bg-gray-100 border border-gray-300 rounded text-xs font-mono">Enter</kbd>
+                                    as each word starts</p>
+                                <p class="text-xs text-gray-500 mt-1">Use <kbd
                                         class="px-1.5 py-0.5 bg-gray-100 border border-gray-300 rounded text-xs font-mono">Space</kbd>
-                                    to play/pause audio anytime</p>
+                                    to play/pause</p>
                             </div>
 
                             <div class="border-t pt-3">
@@ -156,10 +144,34 @@
 
         <!-- Audio Player -->
         <div x-show="audioSrc" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-            <div class="flex flex-col lg:flex-row items-start lg:items-center gap-4">
-                <div class="flex-1">
-                    <div class="flex items-center justify-between mb-3">
-                        <h3 class="text-lg font-semibold text-gray-900">Audio Playback</h3>
+            <div class="flex flex-col gap-4">
+                <!-- Audio Controls Header with Speed -->
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900">Audio Playback</h3>
+                    <div class="flex items-center gap-4">
+                        <!-- Audio Control Buttons -->
+                        <template x-if="isActive || audioSrc">
+                            <div class="flex gap-2">
+                                <button @click="togglePlayPause()" :disabled="!audioSrc"
+                                    class="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                        <path x-show="$refs.audio?.paused !== false" d="M8 5v14l11-7z" />
+                                        <path x-show="$refs.audio?.paused === false"
+                                            d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                                    </svg>
+                                    <span x-text="$refs.audio?.paused !== false ? 'Play' : 'Pause'">Play</span>
+                                </button>
+                                <button @click="rewind()" :disabled="!audioSrc"
+                                    class="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M11.5 12L20 18V6l-8.5 6L12 18V6l8.5 6z" />
+                                        <path d="M4 18l8.5-6L4 6v12z" />
+                                    </svg>
+                                    <span>-5s</span>
+                                </button>
+                            </div>
+                        </template>
+
                         <!-- Playback Speed Control -->
                         <div class="flex items-center gap-2">
                             <span class="text-sm text-gray-600">Speed:</span>
@@ -168,8 +180,8 @@
                                     class="w-8 h-8 flex items-center justify-center text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                                     −
                                 </button>
-                                <span class="text-sm font-mono bg-gray-100 px-2 py-1 rounded min-w-[3rem] text-center" 
-                                      x-text="playbackRate + 'x'">1x</span>
+                                <span class="text-sm font-mono bg-gray-100 px-2 py-1 rounded min-w-[3rem] text-center"
+                                    x-text="playbackRate + 'x'">1x</span>
                                 <button @click="changePlaybackSpeed('up')" :disabled="playbackRate >= 2.0"
                                     class="w-8 h-8 flex items-center justify-center text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                                     +
@@ -177,31 +189,10 @@
                             </div>
                         </div>
                     </div>
-                    <audio x-ref="audio" :src="audioSrc" controls class="w-full audio-controls"></audio>
                 </div>
 
-                <!-- Audio Controls (Both Modes) -->
-                <template x-if="isActive || audioSrc">
-                    <div class="flex gap-2 lg:flex-col lg:w-auto w-full">
-                        <button @click="togglePlayPause()" :disabled="!audioSrc"
-                            class="flex-1 lg:flex-none px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2">
-                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                <path x-show="$refs.audio?.paused !== false" d="M8 5v14l11-7z" />
-                                <path x-show="$refs.audio?.paused === false" d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-                            </svg>
-                            <span x-text="$refs.audio?.paused !== false ? 'Play' : 'Pause'">Play</span>
-                        </button>
-                        <button @click="rewind()" :disabled="!audioSrc"
-                            class="flex-1 lg:flex-none px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2">
-                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M11.5 12L20 18V6l-8.5 6L12 18V6l8.5 6z" />
-                                <path d="M4 18l8.5-6L4 6v12z" />
-                            </svg>
-                            <span class="hidden lg:inline">Rewind</span>
-                            <span class="lg:hidden">-5s</span>
-                        </button>
-                    </div>
-                </template>
+                <!-- Audio Element -->
+                <audio x-ref="audio" :src="audioSrc" controls class="w-full audio-controls"></audio>
             </div>
         </div>
 

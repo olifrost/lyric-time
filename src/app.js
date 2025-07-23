@@ -188,7 +188,7 @@ Alpine.data('lyricApp', () => ({
 
             this.lyrics = extractedLyrics.trim();
             this.showToast('Lyrics imported successfully.');
-            
+
             // Reset the file input
             event.target.value = '';
         };
@@ -211,7 +211,7 @@ Alpine.data('lyricApp', () => ({
         const lines = content.split('\n');
         const lyrics = [];
         let isTimingLine = false;
-        
+
         for (const line of lines) {
             const trimmed = line.trim();
             if (trimmed === 'WEBVTT' || trimmed.startsWith('NOTE') || trimmed === '') {
@@ -319,6 +319,13 @@ Alpine.data('lyricApp', () => ({
         this.currentWordIndex = 0;
         this.timings = [];
         this.wordTimings = [];
+
+        // Always reset audio position when starting timing
+        const audio = this.$refs.audio;
+        if (audio) {
+            audio.pause();
+            audio.currentTime = 0;
+        }
 
         this.parseLyrics();
         this.displayLyrics();
@@ -587,13 +594,13 @@ Alpine.data('lyricApp', () => ({
         const rates = [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0];
         const currentIndex = rates.indexOf(this.playbackRate);
         let newIndex;
-        
+
         if (direction === 'up') {
             newIndex = Math.min(currentIndex + 1, rates.length - 1);
         } else {
             newIndex = Math.max(currentIndex - 1, 0);
         }
-        
+
         this.setPlaybackRate(rates[newIndex]);
     },
 
