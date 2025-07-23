@@ -19,25 +19,39 @@ function initializeTabs() {
     const wordTimingTab = document.getElementById('wordTimingTab');
     const lineTimingMode = document.getElementById('lineTimingMode');
     const wordTimingMode = document.getElementById('wordTimingMode');
-    
+    const audioElement = document.getElementById('audio');
+    const audioWordElement = document.getElementById('audioWord');
+
     lineTimingTab.addEventListener('click', () => {
         // Update tab appearance - Line timing active
         lineTimingTab.className = 'flex-1 py-3 px-6 text-sm font-medium text-white bg-blue-600 border-b-2 border-blue-600 rounded-tl-lg transition-all';
         wordTimingTab.className = 'flex-1 py-3 px-6 text-sm font-medium text-gray-600 bg-white border-b-2 border-transparent hover:bg-gray-50 rounded-tr-lg transition-all';
-        
+
         // Switch content
         lineTimingMode.classList.remove('hidden');
         wordTimingMode.classList.add('hidden');
+
+        // Manage audio elements - show line timing audio only when needed
+        audioWordElement.classList.add('hidden');
+        if (audioElement.src) {
+            audioElement.classList.remove('hidden');
+        }
     });
-    
+
     wordTimingTab.addEventListener('click', () => {
         // Update tab appearance - Word timing active
         wordTimingTab.className = 'flex-1 py-3 px-6 text-sm font-medium text-white bg-blue-600 border-b-2 border-blue-600 rounded-tr-lg transition-all';
         lineTimingTab.className = 'flex-1 py-3 px-6 text-sm font-medium text-gray-600 bg-white border-b-2 border-transparent hover:bg-gray-50 rounded-tl-lg transition-all';
-        
+
         // Switch content
         wordTimingMode.classList.remove('hidden');
         lineTimingMode.classList.add('hidden');
+
+        // Manage audio elements - show word timing audio only when needed
+        audioElement.classList.add('hidden');
+        if (audioWordElement.src) {
+            audioWordElement.classList.remove('hidden');
+        }
     });
 }
 
@@ -120,7 +134,7 @@ startBtn.addEventListener('click', () => {
         timings = [];
         displayLyrics();
         startBtn.textContent = 'Reset';
-        audioElement.style.display = 'block';
+        audioElement.classList.remove('hidden');
         // Show first line as upcoming
         document.getElementById('line0').classList.add('next-line');
         showTimingTooltip();
@@ -128,6 +142,25 @@ startBtn.addEventListener('click', () => {
 });
 
 document.addEventListener('keydown', (e) => {
+    // Handle spacebar to prevent scrolling and enable playback
+    if (e.code === 'Space') {
+        // Don't prevent default if user is typing in an input/textarea
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+            return;
+        }
+        
+        e.preventDefault();
+        if (!isTimingActive && audioElement.src) {
+            // Independent playback when not actively timing
+            if (audioElement.paused) {
+                audioElement.play();
+            } else {
+                audioElement.pause();
+            }
+            return;
+        }
+    }
+    
     if ((e.code === 'Space' || e.code === 'Enter') && isTimingActive && !e.repeat) {
         e.preventDefault();
         if (currentLine < lyrics.length) {
@@ -224,11 +257,11 @@ document.getElementById('settingsBtn').addEventListener('click', (e) => {
 document.addEventListener('click', (e) => {
     const lyricTidyPanel = document.getElementById('lyricTidyPanel');
     const settingsPanel = document.getElementById('settingsPanel');
-    
+
     if (lyricTidyPanel && !lyricTidyPanel.querySelector('.bg-white').contains(e.target) && !lyricTidyBtn.contains(e.target)) {
         lyricTidyPanel.classList.add('hidden');
     }
-    
+
     if (settingsPanel && !settingsPanel.querySelector('.bg-white').contains(e.target) && !document.getElementById('settingsBtn').contains(e.target)) {
         settingsPanel.classList.add('hidden');
     }
@@ -361,7 +394,7 @@ audioFileInput.addEventListener('change', (e) => {
             startBtn.disabled = true;
             downloadBtn.disabled = false;
             downloadFCPXMLBtn.disabled = false;
-            audioElement.style.display = 'none';
+            audioElement.classList.add('hidden');
             showToast('SRT loaded in advanced mode.');
         };
         reader.readAsText(file);
@@ -403,7 +436,7 @@ document.addEventListener('drop', (e) => {
                 startBtn.disabled = true;
                 downloadBtn.disabled = false;
                 downloadFCPXMLBtn.disabled = false;
-                audioElement.style.display = 'none';
+                audioElement.classList.add('hidden');
                 showToast('SRT loaded in advanced mode.');
             };
             reader.readAsText(file);
