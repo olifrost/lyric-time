@@ -148,7 +148,7 @@ document.addEventListener('keydown', (e) => {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
             return;
         }
-        
+
         e.preventDefault();
         if (!isTimingActive && audioElement.src) {
             // Independent playback when not actively timing
@@ -160,7 +160,7 @@ document.addEventListener('keydown', (e) => {
             return;
         }
     }
-    
+
     if ((e.code === 'Space' || e.code === 'Enter') && isTimingActive && !e.repeat) {
         e.preventDefault();
         if (currentLine < lyrics.length) {

@@ -75,7 +75,7 @@ export class WordTiming {
                 if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
                     return;
                 }
-                
+
                 e.preventDefault();
                 if (this.isActive) {
                     // Toggle play/pause during active word timing

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lyrics to SRT Converter</title>
+    <link rel="stylesheet" href="/src/main.css">
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    <div class="max-w-4xl mx-auto py-8 px-4">
+        <h1 class="text-3xl font-bold text-gray-900 text-center mb-8">Lyric Timing Studio</h1>
+
+        <!-- Mode Toggle Tabs -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+            <div class="flex">
+                <button id="lineTimingTab"
+                    class="flex-1 py-3 px-6 text-sm font-medium text-white bg-blue-600 border-b-2 border-blue-600 rounded-tl-lg transition-all">
+                    Line Timing
+                </button>
+                <button id="wordTimingTab"
+                    class="flex-1 py-3 px-6 text-sm font-medium text-gray-600 bg-white border-b-2 border-transparent hover:bg-gray-50 rounded-tr-lg transition-all">
+                    Word Timing
+                </button>
+            </div>
+        </div>
+
+        <!-- Line Timing Mode -->
+        <div id="lineTimingMode" class="timing-mode space-y-6">
+            <!-- File Upload -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <label class="block text-sm font-medium text-gray-700 mb-3">Audio File</label>
+                <input type="file" id="audioFile" accept="audio/*,.srt"
+                    class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-600 file:text-white hover:file:bg-blue-700 file:cursor-pointer border border-gray-300 rounded-lg p-3">
+            </div>
+
+            <!-- Lyrics Input -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="flex justify-between items-center mb-3">
+                    <label class="block text-sm font-medium text-gray-700">Lyrics</label>
+                    <button id="lyricTidyBtn"
+                        class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                    </button>
+                </div>
+                <textarea id="lyricsInput" rows="8" placeholder="Paste your lyrics here (one line per subtitle)"
+                    class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-vertical"></textarea>
+            </div>
+
+            <!-- Control Buttons -->
+            <div class="flex gap-3 justify-center">
+                <button id="startBtn" disabled
+                    class="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-blue-600-dark transition-colors">
+                    Start Timing
+                </button>
+                <button id="downloadBtn" disabled
+                    class="px-6 py-3 bg-success text-white rounded-lg font-medium disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-green-600 transition-colors">
+                    Download SRT
+                </button>
+                <button id="downloadFCPXMLBtn" disabled
+                    class="px-6 py-3 bg-warning text-white rounded-lg font-medium disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-yellow-600 transition-colors">
+                    Download FCP XML
+                </button>
+                <button id="settingsBtn"
+                    class="p-3 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Word Timing Mode -->
+        <div id="wordTimingMode" class="timing-mode hidden space-y-6">
+            <!-- File Upload -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <label class="block text-sm font-medium text-gray-700 mb-3">Audio File</label>
+                <input type="file" id="audioFileWord" accept="audio/*"
+                    class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-600 file:text-white hover:file:bg-blue-700 file:cursor-pointer border border-gray-300 rounded-lg p-3">
+            </div>
+
+            <!-- Lyrics Input -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <label class="block text-sm font-medium text-gray-700 mb-3">Lyrics</label>
+                <textarea id="lyricsInputWord" rows="8" placeholder="Paste your lyrics here (one line per subtitle)"
+                    class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-vertical"></textarea>
+            </div>
+
+            <!-- Start Button -->
+            <div class="flex justify-center">
+                <button id="startWordBtn" disabled
+                    class="px-8 py-3 bg-blue-600 text-white rounded-lg font-medium disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-blue-700 transition-colors">
+                    Start Word Timing
+                </button>
+            </div>
+
+            <!-- Instructions & Controls -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                <p class="text-sm text-gray-700 mb-4">
+                    <strong>Instructions:</strong> Press <kbd
+                        class="px-2 py-1 bg-gray-100 border border-gray-300 rounded text-xs font-mono">Enter</kbd> as
+                    each word starts.
+                    The next word to time will have a subtle blue border.
+                </p>
+
+                <div class="flex flex-wrap gap-4 items-center">
+                    <div class="flex items-center gap-2">
+                        <label class="text-sm font-medium text-gray-700">Highlight Color:</label>
+                        <input type="color" id="highlightColor" value="#3b82f6"
+                            class="w-10 h-8 border border-gray-300 rounded cursor-pointer">
+                    </div>
+
+                    <div class="flex gap-2">
+                        <button id="playPauseBtn" disabled
+                            class="px-3 py-2 text-xs bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1">
+                            <svg class="icon-sm" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M8 5v14l11-7z" />
+                            </svg>
+                            Play
+                        </button>
+                        <button id="rewindBtn" disabled
+                            class="px-3 py-2 text-xs bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1">
+                            <svg class="icon-sm" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M11.5 12L20 18V6l-8.5 6L12 18V6l8.5 6z" />
+                                <path d="M4 18l8.5-6L4 6v12z" />
+                            </svg>
+                            -5s
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Progress -->
+                <div id="timingProgress" class="hidden mt-4">
+                    <div class="flex justify-between text-sm text-gray-600 mb-2">
+                        <span id="progressText">Progress: 0 / 0 words</span>
+                        <span id="currentLineText">Line 1 of 1</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div id="progressFill" class="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                            style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Panel -->
+        <div id="settingsPanel" class="hidden modal-overlay">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full max-h-96 overflow-y-auto">
+                <div class="p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">FCPXML Settings</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Font</label>
+                            <input type="text" id="fontFamily" value="Helvetica" placeholder="Enter font name"
+                                class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Characters per line</label>
+                            <input type="number" id="charsPerLine" value="20" min="10" max="100"
+                                class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Font Size</label>
+                            <input type="number" id="fontSize" value="60" min="1" max="200"
+                                class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Font Color</label>
+                            <input type="color" id="fontColor" value="#ffffff"
+                                class="w-full h-10 border border-gray-300 rounded-lg cursor-pointer">
+                        </div>
+                    </div>
+                    <div class="mt-6 flex justify-end">
+                        <button onclick="document.getElementById('settingsPanel').classList.add('hidden')"
+                            class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Lyric Tidy Panel -->
+        <div id="lyricTidyPanel" class="hidden modal-overlay">
+            <div class="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-96 overflow-y-auto">
+                <div class="p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Lyric Processing</h3>
+                    <div class="grid grid-cols-2 gap-3 text-sm">
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" id="removeHeaders" checked
+                                class="rounded border-gray-300 text-primary focus:ring-primary">
+                            Remove Section Headers
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" id="removeMarkdown" checked
+                                class="rounded border-gray-300 text-primary focus:ring-primary">
+                            Remove Markdown
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" id="removeExtraSpaces" checked
+                                class="rounded border-gray-300 text-primary focus:ring-primary">
+                            Remove Extra Spaces
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" id="removePeriods" checked
+                                class="rounded border-gray-300 text-primary focus:ring-primary">
+                            Remove Periods
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" id="removeCommas" checked
+                                class="rounded border-gray-300 text-primary focus:ring-primary">
+                            Remove Commas
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" id="smartQuotes" checked
+                                class="rounded border-gray-300 text-primary focus:ring-primary">
+                            Smart Quotes
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" id="capitalizeLines"
+                                class="rounded border-gray-300 text-primary focus:ring-primary">
+                            Capitalize Lines
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" id="standardizeQuotes"
+                                class="rounded border-gray-300 text-primary focus:ring-primary">
+                            Standardize Quotes
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" id="removeParentheses"
+                                class="rounded border-gray-300 text-primary focus:ring-primary">
+                            Remove Parentheses
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" id="removeEmojis"
+                                class="rounded border-gray-300 text-primary focus:ring-primary">
+                            Remove Emojis
+                        </label>
+                    </div>
+
+                    <div class="mt-4 space-y-3">
+                        <label class="flex items-center gap-2 text-sm">
+                            <input type="checkbox" id="smartLineSplit"
+                                class="rounded border-gray-300 text-primary focus:ring-primary">
+                            Split Long Lines
+                            <input type="number" id="maxChars" value="45" min="20" max="100"
+                                class="w-16 p-1 border border-gray-300 rounded text-xs">
+                            chars
+                        </label>
+
+                        <div class="flex gap-2">
+                            <input type="text" id="findText" placeholder="Find"
+                                class="flex-1 p-2 border border-gray-300 rounded-lg text-sm">
+                            <input type="text" id="replaceText" placeholder="Replace"
+                                class="flex-1 p-2 border border-gray-300 rounded-lg text-sm">
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex justify-between">
+                        <div class="flex gap-2">
+                            <button id="processLyricsBtn"
+                                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-600-dark transition-colors">
+                                Process
+                            </button>
+                            <button id="undoBtn" disabled
+                                class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                                Undo
+                            </button>
+                        </div>
+                        <button onclick="document.getElementById('lyricTidyPanel').classList.add('hidden')"
+                            class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Audio Players -->
+        <div class="mt-6 space-y-4">
+            <audio id="audio" controls class="hidden audio-controls"></audio>
+            <audio id="audioWord" controls class="hidden audio-controls"></audio>
+        </div>
+
+        <!-- Lyrics Display -->
+        <div id="lyricsDisplay" class="mt-6"></div>
+        <div id="wordLyricsDisplay" class="mt-6"></div>
+
+        <!-- Word Timing Download Section -->
+        <div id="wordDownloadButtons" class="hidden mt-8 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Download Word-Timed Subtitles</h3>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <button id="downloadWordVTT"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-600-dark transition-colors text-sm font-medium">
+                    WebVTT
+                </button>
+                <button id="downloadWordITT"
+                    class="px-4 py-2 bg-success text-white rounded-lg hover:bg-green-600 transition-colors text-sm font-medium">
+                    ITT
+                </button>
+                <button id="downloadWordASS"
+                    class="px-4 py-2 bg-warning text-white rounded-lg hover:bg-yellow-600 transition-colors text-sm font-medium">
+                    ASS
+                </button>
+                <button id="downloadWordSRT"
+                    class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium">
+                    SRT
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="src/fcpxml.js" type="module"></script>
+    <script src="src/lyricProcessor.js" type="module"></script>
+    <script src="/src/main.js" type="module"></script>
+</body>
+
+</html>

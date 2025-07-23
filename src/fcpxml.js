@@ -72,15 +72,15 @@ function splitTextIntoLines(text, maxChars) {
     return lines.join('\n');
 }
 
-function generateFCPXML(timings) {
+function generateFCPXML(timings, settings = {}) {
     const FPS = 25;
     const FRAME_DURATION = "100/2500s";
     
-    // Get current settings
-    const fontFamily = document.getElementById('fontFamily').value;
-    const fontSize = document.getElementById('fontSize').value;
-    const fontColor = document.getElementById('fontColor').value;
-    const charsPerLine = parseInt(document.getElementById('charsPerLine').value);
+    // Use provided settings or defaults
+    const fontFamily = settings.fontFamily || 'Helvetica';
+    const fontSize = settings.fontSize || 60;
+    const fontColor = settings.fontColor || '#ffffff';
+    const charsPerLine = settings.charsPerLine || 20;
     
     // Convert hex color to RGBA (1-based)
     function hexToRGBA(hex) {
@@ -152,12 +152,4 @@ function generateUUID() {
     });
 }
 
-// Add event listener for settings toggle
-document.addEventListener('DOMContentLoaded', () => {
-    const settingsBtn = document.getElementById('settingsBtn');
-    const settingsPanel = document.getElementById('settingsPanel');
-    
-    settingsBtn.addEventListener('click', () => {
-        settingsPanel.classList.toggle('hidden');
-    });
-});
+export { generateFCPXML };
