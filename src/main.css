@@ -64,11 +64,85 @@
 }
 
 .audio-controls {
-  @apply w-full max-w-md mx-auto rounded-lg;
+  @apply w-full rounded-lg;
+  height: 48px;
 }
 
-.audio-controls:not(.hidden) {
-  @apply block;
+/* Enhanced audio player styling for better cross-browser consistency */
+.audio-controls::-webkit-media-controls-panel {
+  background-color: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.audio-controls::-webkit-media-controls-play-button,
+.audio-controls::-webkit-media-controls-current-time-display,
+.audio-controls::-webkit-media-controls-time-remaining-display {
+  color: #374151;
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Monaco, Consolas, monospace;
+}
+
+.audio-controls::-webkit-media-controls-timeline {
+  background-color: #e5e7eb;
+  border-radius: 4px;
+  margin: 0 8px;
+}
+
+.audio-controls::-webkit-media-controls-volume-slider {
+  background-color: #e5e7eb;
+  border-radius: 4px;
+}
+
+/* Future: Custom audio player components */
+.custom-audio-player {
+  @apply bg-gray-50 border border-gray-200 rounded-lg p-4;
+  /* Reserved for future custom audio player implementation with playback speed control */
+}
+
+/* Responsive layout improvements */
+@media (max-width: 768px) {
+  .audio-controls {
+    height: 44px; /* Slightly smaller on mobile */
+  }
+  
+  /* Stack controls vertically on mobile */
+  .lg\\:flex-row {
+    flex-direction: column !important;
+  }
+  
+  .lg\\:w-1\\/2 {
+    width: 100% !important;
+  }
+}
+
+/* Better visual hierarchy */
+.section-title {
+  @apply text-lg font-semibold text-gray-900 mb-4;
+}
+
+.instruction-text {
+  @apply text-sm text-gray-700;
+}
+
+.keyboard-key {
+  @apply px-2 py-1 bg-gray-100 border border-gray-300 rounded text-xs font-mono;
+}
+
+/* Improved focus states */
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  @apply outline-none ring-2 ring-blue-500 ring-offset-2;
+}
+
+/* Better disabled states */
+button:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+/* Loading states (future enhancement) */
+.loading {
+  @apply opacity-75 pointer-events-none;
 }
 
 .time-display {

@@ -12,7 +12,7 @@ function splitTextIntoLines(text, maxChars) {
         const word = words[i];
         const nextWord = words[i + 1];
         const wordLength = word.length;
-        
+
         // If this is a potential orphan (short last word)
         if (nextWord === undefined && isShortWord(word) && currentLine.length > 0) {
             // Check if we can fit it on the current line
@@ -21,7 +21,7 @@ function splitTextIntoLines(text, maxChars) {
             } else {
                 // If the current line is too short, try to redistribute
                 const previousWord = currentLine[currentLine.length - 1];
-                if (currentLine.length > 1 && 
+                if (currentLine.length > 1 &&
                     (word.length + previousWord.length + 1) <= maxChars) {
                     // Move the last word of current line to new line with orphan
                     const lastWord = currentLine.pop();
@@ -42,7 +42,7 @@ function splitTextIntoLines(text, maxChars) {
             currentLength += wordLength + 1;
         } else {
             // Look ahead to prevent orphans in next line
-            if (nextWord && isShortWord(nextWord) && 
+            if (nextWord && isShortWord(nextWord) &&
                 (wordLength + nextWord.length + 1) <= maxChars) {
                 // Keep current word for next line
                 if (currentLine.length > 0) {
@@ -75,25 +75,25 @@ function splitTextIntoLines(text, maxChars) {
 function generateFCPXML(timings, settings = {}) {
     const FPS = 25;
     const FRAME_DURATION = "100/2500s";
-    
+
     // Use provided settings or defaults
     const fontFamily = settings.fontFamily || 'Helvetica';
     const fontSize = settings.fontSize || 60;
     const fontColor = settings.fontColor || '#ffffff';
     const charsPerLine = settings.charsPerLine || 20;
-    
+
     // Convert hex color to RGBA (1-based)
     function hexToRGBA(hex) {
-        const r = parseInt(hex.slice(1,3), 16) / 255;
-        const g = parseInt(hex.slice(3,5), 16) / 255;
-        const b = parseInt(hex.slice(5,7), 16) / 255;
+        const r = parseInt(hex.slice(1, 3), 16) / 255;
+        const g = parseInt(hex.slice(3, 5), 16) / 255;
+        const b = parseInt(hex.slice(5, 7), 16) / 255;
         return `${r} ${g} ${b} 1`;
     }
-    
+
     function secondsToFrames(seconds) {
         return Math.round(seconds * FPS);
     }
-    
+
     function formatDuration(frames) {
         return `${frames * 100}/2500s`;
     }
@@ -102,7 +102,7 @@ function generateFCPXML(timings, settings = {}) {
         const startFrames = secondsToFrames(timing.start);
         const durationFrames = secondsToFrames(timing.end - timing.start);
         const wrappedText = splitTextIntoLines(timing.text, charsPerLine);
-        
+
         return `                            <title ref="r2" lane="1" offset="${formatDuration(startFrames)}" name="${timing.text} - Basic Title" duration="${formatDuration(durationFrames)}">
                                 <param name="Flatten" key="9999/999166631/999166633/2/351" value="1"/>
                                 <param name="Alignment" key="9999/999166631/999166633/2/354/999169573/401" value="1 (Center)"/>
@@ -145,7 +145,7 @@ ${titles}
 }
 
 function generateUUID() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
         const r = Math.random() * 16 | 0;
         const v = c === 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16).toUpperCase();

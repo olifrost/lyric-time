@@ -18,6 +18,7 @@
   "author": "Your Name",
   "license": "MIT",
   "dependencies": {
+    "@alpinejs/collapse": "^3.14.9",
     "@tabler/icons": "^3.34.1",
     "alpinejs": "^3.14.9",
     "lucide": "^0.525.0"

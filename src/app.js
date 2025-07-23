@@ -1,9 +1,16 @@
+import Alpine from 'alpinejs';
+import collapse from '@alpinejs/collapse';
 import { processLyrics } from './lyricProcessor.js';
 import { generateFCPXML } from './fcpxml.js';
 
-// Wait for Alpine to be available and then register the component
-document.addEventListener('alpine:init', () => {
-    Alpine.data('lyricApp', () => ({
+// Register Alpine plugins
+Alpine.plugin(collapse);
+
+// Make Alpine available globally
+window.Alpine = Alpine;
+
+// Main app component
+Alpine.data('lyricApp', () => ({
     // State
     mode: 'line', // 'line' or 'word'
     lyrics: '',
@@ -11,7 +18,7 @@ document.addEventListener('alpine:init', () => {
     audioFile: null,
     audioSrc: '',
     audioBaseFilename: 'subtitles',
-    
+
     // Timing state
     isActive: false,
     parsedLyrics: [], // Array of lines, each line is array of words for word mode
@@ -19,7 +26,7 @@ document.addEventListener('alpine:init', () => {
     currentWordIndex: 0,
     timings: [],
     wordTimings: [],
-    
+
     // UI state
     showLyricTidy: false,
     showSettings: false,
@@ -27,14 +34,14 @@ document.addEventListener('alpine:init', () => {
     progressText: '',
     currentLineText: '',
     progressPercent: 0,
-    
+
     // Settings
     highlightColor: '#3b82f6',
     fontFamily: 'Helvetica',
     charsPerLine: 20,
     fontSize: 60,
     fontColor: '#ffffff',
-    
+
     // Lyric processing options
     lyricOptions: {
         removeHeaders: true,
@@ -57,18 +64,18 @@ document.addEventListener('alpine:init', () => {
     get canStart() {
         return this.audioSrc && this.lyrics.trim();
     },
-    
+
     get canDownload() {
         return this.timings.length > 0 || this.wordTimings.length > 0;
     },
-    
+
     get totalWords() {
         if (this.mode === 'word' && this.parsedLyrics.length > 0) {
             return this.parsedLyrics.reduce((total, line) => total + line.length, 0);
         }
         return 0;
     },
-    
+
     get completedWords() {
         return this.wordTimings.length;
     },
@@ -78,7 +85,7 @@ document.addEventListener('alpine:init', () => {
         this.setupAudio();
         this.setupKeyboardEvents();
         this.updateHighlightColor();
-        
+
         // Auto-focus lyrics input
         this.$nextTick(() => {
             this.$refs.lyricsInput?.focus();
@@ -126,7 +133,7 @@ document.addEventListener('alpine:init', () => {
                 alert('Invalid or empty SRT file.');
                 return;
             }
-            
+
             this.timings = srtTimings;
             this.lyrics = srtTimings.map(t => t.text).join('\n');
             this.displayLyrics();
@@ -232,7 +239,7 @@ document.addEventListener('alpine:init', () => {
         this.parseLyrics();
         this.displayLyrics();
         this.highlightCurrent();
-        
+
         if (this.mode === 'word') {
             this.showProgress = true;
             this.updateProgress();
@@ -261,11 +268,11 @@ document.addEventListener('alpine:init', () => {
 
     parseLyrics() {
         const lines = this.lyrics.split('\n').filter(line => line.trim());
-        
+
         if (this.mode === 'line') {
             this.parsedLyrics = lines.map(line => line.trim());
         } else {
-            this.parsedLyrics = lines.map(line => 
+            this.parsedLyrics = lines.map(line =>
                 line.trim().split(/\s+/).filter(word => word)
             );
         }
@@ -301,7 +308,7 @@ document.addEventListener('alpine:init', () => {
         if (this.currentLineIndex < this.timings.length) {
             this.timings[this.currentLineIndex].end = audio.currentTime;
             this.currentLineIndex++;
-            
+
             if (this.currentLineIndex >= this.parsedLyrics.length) {
                 this.finishTiming();
             } else {
@@ -344,10 +351,10 @@ document.addEventListener('alpine:init', () => {
         this.isActive = false;
         const audio = this.$refs.audio;
         if (audio) audio.pause();
-        
+
         this.showProgress = false;
         this.showToast('Timing complete! Download your files below.', 3000);
-        
+
         // Scroll to download section
         this.$nextTick(() => {
             this.$refs.downloadSection?.scrollIntoView({ behavior: 'smooth' });
@@ -358,7 +365,10 @@ document.addEventListener('alpine:init', () => {
     displayLyrics() {
         this.$nextTick(() => {
             const display = this.$refs.lyricsDisplay;
-            if (!display || this.parsedLyrics.length === 0) return;
+            if (!display || this.parsedLyrics.length === 0) {
+                if (display) display.innerHTML = '';
+                return;
+            }
 
             if (this.mode === 'line') {
                 display.innerHTML = this.parsedLyrics
@@ -378,7 +388,9 @@ document.addEventListener('alpine:init', () => {
     clearDisplays() {
         this.$nextTick(() => {
             const display = this.$refs.lyricsDisplay;
-            if (display) display.innerHTML = '';
+            if (display) {
+                display.innerHTML = '<div class="text-center text-gray-400 py-8"><p>Enter lyrics above to see them displayed here during timing</p></div>';
+            }
         });
     },
 
@@ -424,7 +436,7 @@ document.addEventListener('alpine:init', () => {
         for (let lineIndex = 0; lineIndex < this.currentLineIndex; lineIndex++) {
             const line = document.getElementById(`wordLine${lineIndex}`);
             if (line) line.classList.add('completed');
-            
+
             const lineWords = document.querySelectorAll(`[data-line="${lineIndex}"]`);
             lineWords.forEach(word => word.classList.add('completed-word'));
         }
@@ -451,7 +463,7 @@ document.addEventListener('alpine:init', () => {
 
     updateProgress() {
         if (this.mode !== 'word') return;
-        
+
         const total = this.totalWords;
         const completed = this.completedWords;
         this.progressPercent = total > 0 ? (completed / total) * 100 : 0;
@@ -481,7 +493,7 @@ document.addEventListener('alpine:init', () => {
     // Lyric processing
     processLyrics() {
         this.originalLyrics = this.lyrics;
-        
+
         const options = {
             ...this.lyricOptions,
             removePunctuation: true,
@@ -860,10 +872,10 @@ document.addEventListener('alpine:init', () => {
             toast.className = 'fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-lg shadow-lg z-50';
             document.body.appendChild(toast);
         }
-        
+
         toast.textContent = message;
         toast.style.display = 'block';
-        
+
         if (duration) {
             setTimeout(() => this.hideToast(), duration);
         }
@@ -875,5 +887,7 @@ document.addEventListener('alpine:init', () => {
             toast.style.display = 'none';
         }
     }
-    }));
-});
+}));
+
+// Start Alpine
+Alpine.start();
