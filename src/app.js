@@ -274,6 +274,12 @@ Alpine.data('lyricApp', () => ({
                 e.preventDefault();
                 this.markTiming();
             }
+
+            // Handle Backspace for undo in word timing mode
+            if (e.code === 'Backspace' && this.isActive && this.mode === 'word' && !e.repeat) {
+                e.preventDefault();
+                this.undoWordTiming();
+            }
         });
 
         document.addEventListener('keyup', (e) => {
@@ -438,7 +444,60 @@ Alpine.data('lyricApp', () => ({
         }
     },
 
-    finishTiming() {
+    undoWordTiming() {
+        if (this.mode !== 'word' || !this.isActive) return;
+
+        const audio = this.$refs.audio;
+        if (!audio) return;
+
+        // Pause the audio
+        audio.pause();
+
+        // If we're at the beginning of the first line with no timings, can't undo further
+        if (this.currentLineIndex === 0 && this.currentWordIndex === 0 && this.wordTimings.length === 0) {
+            this.showToast('Already at the beginning', 1000);
+            return;
+        }
+
+        let targetLineIndex = this.currentLineIndex;
+
+        // If we're at the beginning of the current line (no words timed in this line),
+        // and there are previous lines, go back to the previous line
+        const currentLineTimings = this.wordTimings.filter(timing => timing.lineIndex === this.currentLineIndex);
+        if (this.currentWordIndex === 0 && currentLineTimings.length === 0 && this.currentLineIndex > 0) {
+            targetLineIndex = this.currentLineIndex - 1;
+        }
+
+        // Remove all word timings for the target line and any lines after it
+        this.wordTimings = this.wordTimings.filter(timing => timing.lineIndex < targetLineIndex);
+
+        // Set current position to the beginning of the target line
+        this.currentLineIndex = targetLineIndex;
+        this.currentWordIndex = 0;
+
+        // Find the appropriate audio start time
+        let lineStartTime = 0;
+
+        if (targetLineIndex > 0) {
+            // Find the last timing from the previous completed line
+            const previousLineTimings = this.wordTimings.filter(timing => timing.lineIndex < targetLineIndex);
+            if (previousLineTimings.length > 0) {
+                // Get the last timing from the previous completed line and go back a bit
+                const lastPreviousTiming = previousLineTimings[previousLineTimings.length - 1];
+                lineStartTime = Math.max(0, lastPreviousTiming.startTime - 1); // Go back 1 second before the last word
+            }
+        }
+
+        // Set audio to the calculated start time
+        audio.currentTime = lineStartTime;
+
+        // Update the display and progress
+        this.highlightCurrent();
+        this.updateProgress();
+
+        // Show a brief message
+        this.showToast(`Returned to start of line ${targetLineIndex + 1}`, 1500);
+    }, finishTiming() {
         this.isActive = false;
         const audio = this.$refs.audio;
         if (audio) audio.pause();
@@ -918,18 +977,18 @@ Alpine.data('lyricApp', () => ({
         return ass;
     },
 
-    // Utility function to calculate proper end times without overlaps
+    // Utility function to calculate proper end times without gaps between words
     calculateEndTime(lineIndex, wordIndex, lineGroups, lineTimings) {
         if (wordIndex < lineTimings.length - 1) {
-            // End just before the next word starts
-            return lineTimings[wordIndex + 1].startTime - 0.01;
+            // For words within the same line, end exactly when the next word starts (no gap)
+            return lineTimings[wordIndex + 1].startTime;
         } else {
             // Last word of the line - check if there's a next line
             const nextLineIndex = lineIndex + 1;
             const nextLineTimings = lineGroups[nextLineIndex.toString()];
             if (nextLineTimings && nextLineTimings[0]) {
-                // End just before the first word of next line
-                return nextLineTimings[0].startTime - 0.01;
+                // Allow a small gap between lines (0.1 seconds)
+                return nextLineTimings[0].startTime - 0.1;
             } else {
                 // Very last word - add reasonable duration
                 return lineTimings[wordIndex].startTime + 1.5;
