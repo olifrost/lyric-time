@@ -96,22 +96,18 @@
 /* Future: Custom audio player components */
 .custom-audio-player {
   @apply bg-gray-50 border border-gray-200 rounded-lg p-4;
-  /* Reserved for future custom audio player implementation with playback speed control */
+  /* Reserved for future custom audio player implementation */
+}
+
+/* Playback speed controls */
+.playback-speed-display {
+  @apply font-mono text-sm bg-gray-100 px-3 py-1 rounded border min-w-[3rem] text-center;
 }
 
 /* Responsive layout improvements */
 @media (max-width: 768px) {
   .audio-controls {
     height: 44px; /* Slightly smaller on mobile */
-  }
-  
-  /* Stack controls vertically on mobile */
-  .lg\\:flex-row {
-    flex-direction: column !important;
-  }
-  
-  .lg\\:w-1\\/2 {
-    width: 100% !important;
   }
 }
 

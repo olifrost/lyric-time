@@ -41,16 +41,29 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
             <div class="flex justify-between items-center mb-3">
                 <label class="block text-sm font-medium text-gray-700">Lyrics</label>
-                <button @click="showLyricTidy = true"
-                    class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                </button>
+                <div class="flex gap-2">
+                    <button @click="$refs.lyricsFileInput.click()"
+                        class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors" 
+                        title="Import lyrics from file">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </button>
+                    <button @click="showLyricTidy = true"
+                        class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                        title="Clean up lyrics">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                    </button>
+                </div>
             </div>
+            <input type="file" x-ref="lyricsFileInput" @change="handleLyricsImport" accept=".txt,.srt,.lrc,.vtt" 
+                style="display: none;">
             <textarea x-model="lyrics" x-ref="lyricsInput" rows="8"
-                placeholder="Paste your lyrics here (one line per subtitle)"
+                placeholder="Paste your lyrics here (one line per subtitle) or use the import button to load from a file"
                 class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical"></textarea>
         </div>
 
@@ -70,14 +83,6 @@
                         <span
                             x-text="isActive ? 'Reset Timing' : (mode === 'line' ? 'Start Line Timing' : 'Start Word Timing')"></span>
                     </button>
-
-                    <!-- Quick Download for Line Mode -->
-                    <template x-if="mode === 'line' && canDownload">
-                        <button @click="downloadSRT()"
-                            class="w-full px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors">
-                            Download SRT
-                        </button>
-                    </template>
                 </div>
 
                 <!-- Right Column: Instructions & Settings -->
@@ -153,12 +158,30 @@
         <div x-show="audioSrc" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
             <div class="flex flex-col lg:flex-row items-start lg:items-center gap-4">
                 <div class="flex-1">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-3">Audio Playback</h3>
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-lg font-semibold text-gray-900">Audio Playback</h3>
+                        <!-- Playback Speed Control -->
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm text-gray-600">Speed:</span>
+                            <div class="flex items-center gap-1">
+                                <button @click="changePlaybackSpeed('down')" :disabled="playbackRate <= 0.25"
+                                    class="w-8 h-8 flex items-center justify-center text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                                    −
+                                </button>
+                                <span class="text-sm font-mono bg-gray-100 px-2 py-1 rounded min-w-[3rem] text-center" 
+                                      x-text="playbackRate + 'x'">1x</span>
+                                <button @click="changePlaybackSpeed('up')" :disabled="playbackRate >= 2.0"
+                                    class="w-8 h-8 flex items-center justify-center text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                                    +
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                     <audio x-ref="audio" :src="audioSrc" controls class="w-full audio-controls"></audio>
                 </div>
 
-                <!-- Audio Controls (Word Mode) -->
-                <template x-if="mode === 'word' && (isActive || audioSrc)">
+                <!-- Audio Controls (Both Modes) -->
+                <template x-if="isActive || audioSrc">
                     <div class="flex gap-2 lg:flex-col lg:w-auto w-full">
                         <button @click="togglePlayPause()" :disabled="!audioSrc"
                             class="flex-1 lg:flex-none px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2">

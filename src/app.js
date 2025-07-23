@@ -41,6 +41,7 @@ Alpine.data('lyricApp', () => ({
     charsPerLine: 20,
     fontSize: 60,
     fontColor: '#ffffff',
+    playbackRate: 1.0, // Playback speed control
 
     // Lyric processing options
     lyricOptions: {
@@ -161,6 +162,85 @@ Alpine.data('lyricApp', () => ({
         return parseInt(h) * 3600 + parseInt(m) * 60 + parseInt(s) + parseInt(ms) / 1000;
     },
 
+    // Lyrics import handling
+    handleLyricsImport(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const content = e.target.result;
+            let extractedLyrics = '';
+
+            if (file.name.toLowerCase().endsWith('.srt')) {
+                // Extract text from SRT, removing timestamps
+                extractedLyrics = this.extractLyricsFromSRT(content);
+            } else if (file.name.toLowerCase().endsWith('.vtt')) {
+                // Extract text from WebVTT, removing timestamps
+                extractedLyrics = this.extractLyricsFromVTT(content);
+            } else if (file.name.toLowerCase().endsWith('.lrc')) {
+                // Extract text from LRC, removing timestamps
+                extractedLyrics = this.extractLyricsFromLRC(content);
+            } else {
+                // Assume plain text file
+                extractedLyrics = content;
+            }
+
+            this.lyrics = extractedLyrics.trim();
+            this.showToast('Lyrics imported successfully.');
+            
+            // Reset the file input
+            event.target.value = '';
+        };
+        reader.readAsText(file);
+    },
+
+    extractLyricsFromSRT(content) {
+        const srtRegex = /\d+\s+[\d:,]+\s+-->\s+[\d:,]+\s+([\s\S]*?)(?=\n\d+\s|$)/g;
+        let match;
+        const lyrics = [];
+        while ((match = srtRegex.exec(content)) !== null) {
+            const text = match[1].trim().replace(/\n/g, ' ');
+            if (text) lyrics.push(text);
+        }
+        return lyrics.join('\n');
+    },
+
+    extractLyricsFromVTT(content) {
+        // Remove WEBVTT header and timing lines
+        const lines = content.split('\n');
+        const lyrics = [];
+        let isTimingLine = false;
+        
+        for (const line of lines) {
+            const trimmed = line.trim();
+            if (trimmed === 'WEBVTT' || trimmed.startsWith('NOTE') || trimmed === '') {
+                continue;
+            }
+            if (trimmed.includes('-->')) {
+                isTimingLine = true;
+                continue;
+            }
+            if (isTimingLine && trimmed) {
+                lyrics.push(trimmed);
+                isTimingLine = false;
+            }
+        }
+        return lyrics.join('\n');
+    },
+
+    extractLyricsFromLRC(content) {
+        // Remove LRC timestamps [mm:ss.xx]
+        const lrcRegex = /\[\d+:\d+\.\d+\]\s*(.*)/g;
+        let match;
+        const lyrics = [];
+        while ((match = lrcRegex.exec(content)) !== null) {
+            const text = match[1].trim();
+            if (text) lyrics.push(text);
+        }
+        return lyrics.join('\n');
+    },
+
     // Audio setup
     setupAudio() {
         this.$nextTick(() => {
@@ -168,6 +248,10 @@ Alpine.data('lyricApp', () => ({
             if (audio) {
                 audio.addEventListener('play', () => this.updatePlayButton(false));
                 audio.addEventListener('pause', () => this.updatePlayButton(true));
+                audio.addEventListener('loadedmetadata', () => {
+                    // Restore playback rate when new audio loads
+                    audio.playbackRate = this.playbackRate;
+                });
             }
         });
     },
@@ -488,6 +572,29 @@ Alpine.data('lyricApp', () => ({
         if (audio) {
             audio.currentTime = Math.max(0, audio.currentTime - 5);
         }
+    },
+
+    // Playback speed controls
+    setPlaybackRate(rate) {
+        this.playbackRate = rate;
+        const audio = this.$refs.audio;
+        if (audio) {
+            audio.playbackRate = rate;
+        }
+    },
+
+    changePlaybackSpeed(direction) {
+        const rates = [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0];
+        const currentIndex = rates.indexOf(this.playbackRate);
+        let newIndex;
+        
+        if (direction === 'up') {
+            newIndex = Math.min(currentIndex + 1, rates.length - 1);
+        } else {
+            newIndex = Math.max(currentIndex - 1, 0);
+        }
+        
+        this.setPlaybackRate(rates[newIndex]);
     },
 
     // Lyric processing
