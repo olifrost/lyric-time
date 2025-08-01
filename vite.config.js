@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 
 export default defineConfig({
+  base: '/lyric-time/',
   root: '.',
   server: {
     port: 3000,

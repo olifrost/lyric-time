@@ -1,24 +1,62 @@
+const sectionWords = [
+    'Verse', 'Chorus', 'Bridge', 'Intro', 'Outro', 'Pre-Chorus', 'Prechorus', 'Interlude', 'Instrumental', 'Hook', 'Refrain', 'Break', 'Coda', 'Tag', 'Solo', 'Rap', 'Drop', 'Build', 'Reprise', 'Ending'
+];
+const sectionRegex = new RegExp(`^(##.*|${sectionWords.join('|')})$`);
+
 const lyricProcessors = {
-    removeHeaders: (text) => text.replace(/^##.*$/gm, ''),
-    
+    removeHeaders: (text) => {
+        let lines = text.split('\n');
+        let processed = [];
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            if (sectionRegex.test(line.trim())) {
+                // Always insert a blank line for a section header
+                if (processed.length === 0 || processed[processed.length - 1].trim() !== '') {
+                    processed.push('');
+                }
+                // Do not add the section header itself
+            } else {
+                processed.push(line);
+            }
+        }
+        // Collapse multiple blank lines into a single blank line
+        let collapsed = [];
+        let lastWasBlank = false;
+        for (const line of processed) {
+            if (line.trim() === '') {
+                if (!lastWasBlank) {
+                    collapsed.push('');
+                    lastWasBlank = true;
+                }
+            } else {
+                collapsed.push(line);
+                lastWasBlank = false;
+            }
+        }
+        // Remove leading/trailing blank lines
+        while (collapsed.length && collapsed[0].trim() === '') collapsed.shift();
+        while (collapsed.length && collapsed[collapsed.length - 1].trim() === '') collapsed.pop();
+        return collapsed.join('\n');
+    },
+
     removeMarkdown: (text) => text.replace(/[*_~`#\[\]()]|>\s/g, ''),
-    
+
     removeExtraSpaces: (text) => {
         return text
             .split('\n')
             .filter(line => line.trim())
             .join('\n');
     },
-    
+
     removePunctuation: (text, options = { periods: true, commas: true }) => {
         let result = text;
         if (options.periods) result = result.replace(/\./g, '');
         if (options.commas) result = result.replace(/,/g, '');
         return result;
     },
-    
+
     smartQuotes: (text) => text.replace(/'/g, '’'),
-    
+
     capitalizeLines: (text) => {
         return text
             .split('\n')
@@ -30,21 +68,21 @@ const lyricProcessors = {
             })
             .join('\n');
     },
-    
+
     standardizeQuotes: (text) => text.replace(/[""]/g, '"'),
-    
+
     removeParentheses: (text) => text.replace(/[()]/g, ''),
-    
+
     removeEmojis: (text) => text.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, ''),
-    
+
     smartLineSplit: (text, maxChars = 40) => {
         return text.split('\n').map(line => {
             if (line.length <= maxChars) return line;
-            
+
             // Find the best splitting point near the middle
             const middle = Math.floor(line.length / 2);
             let splitIndex = middle;
-            
+
             // Look for a space within 10 characters of the middle
             for (let i = 0; i < 10; i++) {
                 if (line[middle - i] === ' ') {
@@ -56,12 +94,12 @@ const lyricProcessors = {
                     break;
                 }
             }
-            
+
             // Split and trim any extra spaces
             return line.slice(0, splitIndex).trim() + '\n' + line.slice(splitIndex).trim();
         }).join('\n');
     },
-    
+
     findReplace: (text, find, replace) => {
         if (!find || !replace) return text;
         const regex = new RegExp(find, 'g');
@@ -71,7 +109,7 @@ const lyricProcessors = {
 
 function processLyrics(text, options) {
     let result = text;
-    
+
     if (options.removeHeaders) result = lyricProcessors.removeHeaders(result);
     if (options.removeMarkdown) result = lyricProcessors.removeMarkdown(result);
     if (options.removeExtraSpaces) result = lyricProcessors.removeExtraSpaces(result);
@@ -92,7 +130,7 @@ function processLyrics(text, options) {
     if (options.findReplace) {
         result = lyricProcessors.findReplace(result, options.find, options.replace);
     }
-    
+
     return result;
 }
 

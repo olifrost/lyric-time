@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lyric Timing Studio</title>
+  <script type="module" crossorigin src="/lyric-time/assets/index-CV2Ko5i-.js"></script>
+  <link rel="stylesheet" crossorigin href="/lyric-time/assets/index-Bj8K5pLS.css">
+</head>
+
+<body class="bg-gray-50 min-h-screen" x-data="lyricApp">>
+    <div class="max-w-4xl mx-auto py-8 px-4">
+        <h1 class="text-3xl font-bold text-gray-900 text-center mb-8">Lyric Timing Studio</h1>
+
+        <!-- Mode Toggle Tabs -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+            <div class="flex">
+                <button @click="switchMode('line')" :class="{
+                        'text-white bg-blue-600 border-blue-600': mode === 'line',
+                        'text-gray-600 bg-white border-transparent hover:bg-gray-50': mode !== 'line'
+                    }" class="flex-1 py-3 px-6 text-sm font-medium border-b-2 rounded-tl-lg transition-all">
+                    Line Timing
+                </button>
+                <button @click="switchMode('word')" :class="{
+                        'text-white bg-blue-600 border-blue-600': mode === 'word',
+                        'text-gray-600 bg-white border-transparent hover:bg-gray-50': mode !== 'word'
+                    }" class="flex-1 py-3 px-6 text-sm font-medium border-b-2 rounded-tr-lg transition-all">
+                    Word Timing
+                </button>
+            </div>
+        </div>
+
+        <!-- File Upload -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-3">Audio File</label>
+            <input type="file" @change="handleFileUpload" accept="audio/*,.srt"
+                class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-600 file:text-white hover:file:bg-blue-700 file:cursor-pointer border border-gray-300 rounded-lg p-3">
+        </div>
+
+        <!-- Lyrics Input -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+            <div class="flex justify-between items-center mb-3">
+                <label class="block text-sm font-medium text-gray-700">Lyrics</label>
+                <div class="flex gap-2">
+                    <button @click="$refs.lyricsFileInput.click()"
+                        class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                        title="Import lyrics from file">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </button>
+                    <button @click="showLyricTidy = true"
+                        class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                        title="Clean up lyrics">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <input type="file" x-ref="lyricsFileInput" @change="handleLyricsImport" accept=".txt,.srt,.lrc,.vtt"
+                style="display: none;">
+            <textarea x-model="lyrics" x-ref="lyricsInput" rows="8"
+                placeholder="Paste your lyrics here (one line per subtitle) or use the import button to load from a file"
+                class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical"></textarea>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <!-- Left Column: Controls -->
+                <div class="lg:w-1/2 space-y-4">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Timing Controls</h3>
+
+                    <!-- Start/Reset Button -->
+                    <button @click="isActive ? resetTiming() : startTiming()" :disabled="!canStart && !isActive" :class="{
+                            'bg-blue-600 hover:bg-blue-700': !isActive,
+                            'bg-red-600 hover:bg-red-700': isActive,
+                            'bg-gray-300 cursor-not-allowed': !canStart && !isActive
+                        }" class="w-full px-6 py-3 text-white rounded-lg font-medium transition-colors">
+                        <span
+                            x-text="isActive ? 'Reset Timing' : (mode === 'line' ? 'Start Line Timing' : 'Start Word Timing')"></span>
+                    </button>
+                </div>
+
+                <!-- Right Column: Instructions & Settings -->
+                <div class="lg:w-1/2 space-y-4">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                        <span x-text="mode === 'line' ? 'Line Timing' : 'Word Timing'"></span> Instructions
+                    </h3>
+
+                    <!-- Line Timing Instructions -->
+                    <template x-if="mode === 'line'">
+                        <div class="text-sm text-gray-700">
+                            <p>Hold <kbd
+                                    class="px-2 py-1 bg-gray-100 border border-gray-300 rounded text-xs font-mono">Enter</kbd>
+                                for each line duration</p>
+                            <p class="text-xs text-gray-500 mt-1">Use <kbd
+                                    class="px-1.5 py-0.5 bg-gray-100 border border-gray-300 rounded text-xs font-mono">Space</kbd>
+                                to play/pause</p>
+                        </div>
+                    </template>
+
+                    <!-- Word Timing Instructions & Settings -->
+                    <template x-if="mode === 'word'">
+                        <div class="space-y-4">
+                            <div class="text-sm text-gray-700">
+                                <p>Press <kbd
+                                        class="px-2 py-1 bg-gray-100 border border-gray-300 rounded text-xs font-mono">Enter</kbd>
+                                    as each word starts</p>
+                                <p class="text-xs text-gray-500 mt-1">Use <kbd
+                                        class="px-1.5 py-0.5 bg-gray-100 border border-gray-300 rounded text-xs font-mono">Space</kbd>
+                                    to play/pause</p>
+                                <p class="text-xs text-gray-500 mt-1">Press <kbd
+                                        class="px-1.5 py-0.5 bg-gray-100 border border-gray-300 rounded text-xs font-mono">Backspace</kbd>
+                                    to undo current line (press again to go back further)</p>
+                            </div>
+
+                            <div class="border-t pt-3">
+                                <div class="flex items-center justify-between">
+                                    <label class="text-sm font-medium text-gray-700">Highlight Color:</label>
+                                    <input type="color" x-model="highlightColor" @change="updateHighlightColor()"
+                                        class="w-12 h-8 border border-gray-300 rounded cursor-pointer">
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Progress Bar (Word Mode Only) -->
+            <template x-if="mode === 'word' && showProgress">
+                <div class="mt-6 pt-6 border-t">
+                    <div class="flex justify-between text-sm text-gray-600 mb-2">
+                        <span x-text="progressText">Progress: 0 / 0 words</span>
+                        <span x-text="currentLineText">Line 1 of 1</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                            :style="`width: ${progressPercent}%`"></div>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- Audio Player -->
+        <div x-show="audioSrc" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+            <div class="flex flex-col gap-4">
+                <!-- Audio Controls Header with Speed -->
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900">Audio Playback</h3>
+                    <div class="flex items-center gap-4">
+                        <!-- Audio Control Buttons -->
+                        <template x-if="isActive || audioSrc">
+                            <div class="flex gap-2">
+                                <button @click="togglePlayPause()" :disabled="!audioSrc"
+                                    class="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                        <path x-show="$refs.audio?.paused !== false" d="M8 5v14l11-7z" />
+                                        <path x-show="$refs.audio?.paused === false"
+                                            d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                                    </svg>
+                                    <span x-text="$refs.audio?.paused !== false ? 'Play' : 'Pause'">Play</span>
+                                </button>
+                                <button @click="rewind()" :disabled="!audioSrc"
+                                    class="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M11.5 12L20 18V6l-8.5 6L12 18V6l8.5 6z" />
+                                        <path d="M4 18l8.5-6L4 6v12z" />
+                                    </svg>
+                                    <span>-5s</span>
+                                </button>
+                            </div>
+                        </template>
+
+                        <!-- Playback Speed Control -->
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm text-gray-600">Speed:</span>
+                            <div class="flex items-center gap-1">
+                                <button @click="changePlaybackSpeed('down')" :disabled="playbackRate <= 0.25"
+                                    class="w-8 h-8 flex items-center justify-center text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                                    −
+                                </button>
+                                <span class="text-sm font-mono bg-gray-100 px-2 py-1 rounded min-w-[3rem] text-center"
+                                    x-text="playbackRate + 'x'">1x</span>
+                                <button @click="changePlaybackSpeed('up')" :disabled="playbackRate >= 2.0"
+                                    class="w-8 h-8 flex items-center justify-center text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                                    +
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Audio Element -->
+                <audio x-ref="audio" :src="audioSrc" controls class="w-full audio-controls"></audio>
+            </div>
+        </div>
+
+        <!-- Lyrics Display -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">
+                    <span x-text="mode === 'line' ? 'Line Timing Display' : 'Word Timing Display'"></span>
+                </h3>
+                <div x-show="isActive" class="text-sm text-gray-500">
+                    <span
+                        x-text="mode === 'line' ? 'Hold Enter for each line duration' : 'Press Enter at each word start'"></span>
+                </div>
+            </div>
+            <div x-ref="lyricsDisplay"
+                class="min-h-[200px] max-h-[400px] overflow-y-auto bg-gray-50 rounded-lg p-4 border-2 border-dashed border-gray-200">
+                <div x-show="!lyrics.trim()" class="text-center text-gray-400 py-8">
+                    <p>Enter lyrics above to see them displayed here during timing</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Line Timing Download Section -->
+        <template x-if="mode === 'line' && canDownload">
+            <div x-ref="downloadSection" class="mt-8 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Download Line-Timed Subtitles</h3>
+                <div class="space-y-4">
+                    <!-- Basic Downloads -->
+                    <div class="flex gap-3">
+                        <button @click="downloadSRT()"
+                            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium">
+                            Download SRT
+                        </button>
+                    </div>
+
+                    <!-- FCPXML Section -->
+                    <div class="border-t pt-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="font-medium text-gray-900">Final Cut Pro XML</h4>
+                            <button @click="showSettings = !showSettings"
+                                class="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                Settings
+                            </button>
+                        </div>
+
+                        <!-- FCPXML Settings (collapsible) -->
+                        <div x-show="showSettings" x-collapse class="bg-gray-50 rounded-lg p-4 mb-3 space-y-3">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Font</label>
+                                    <input type="text" x-model="fontFamily" placeholder="Enter font name"
+                                        class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Font Size</label>
+                                    <input type="number" x-model="fontSize" min="1" max="200"
+                                        class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Characters per
+                                        line</label>
+                                    <input type="number" x-model="charsPerLine" min="10" max="100"
+                                        class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Font Color</label>
+                                    <input type="color" x-model="fontColor"
+                                        class="w-full h-10 border border-gray-300 rounded-lg cursor-pointer">
+                                </div>
+                            </div>
+                        </div>
+
+                        <button @click="downloadFCPXML()"
+                            class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium">
+                            Download FCP XML
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <!-- Word Timing Download Section -->
+        <template x-if="mode === 'word' && canDownload">
+            <div x-ref="downloadSection" class="mt-8 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Download Word-Timed Subtitles</h3>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <button @click="downloadWebVTT()"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
+                        WebVTT
+                    </button>
+                    <button @click="downloadITT()"
+                        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium">
+                        ITT
+                    </button>
+                    <button @click="downloadASS()"
+                        class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors text-sm font-medium">
+                        ASS
+                    </button>
+                    <button @click="downloadSRT()"
+                        class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium">
+                        SRT
+                    </button>
+                </div>
+            </div>
+        </template>
+
+        <!-- Lyric Tidy Panel -->
+        <div x-show="showLyricTidy" @click.away="showLyricTidy = false" x-cloak
+            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-96 overflow-y-auto mx-4">
+                <div class="p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Lyric Processing</h3>
+                    <div class="grid grid-cols-2 gap-3 text-sm">
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" x-model="lyricOptions.removeHeaders"
+                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            Remove Section Headers
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" x-model="lyricOptions.removeMarkdown"
+                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            Remove Markdown
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" x-model="lyricOptions.removeExtraSpaces"
+                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            Remove Extra Spaces
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" x-model="lyricOptions.removePeriods"
+                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            Remove Periods
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" x-model="lyricOptions.removeCommas"
+                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            Remove Commas
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" x-model="lyricOptions.smartQuotes"
+                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            Smart Quotes
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" x-model="lyricOptions.capitalizeLines"
+                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            Capitalize Lines
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" x-model="lyricOptions.standardizeQuotes"
+                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            Standardize Quotes
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" x-model="lyricOptions.removeParentheses"
+                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            Remove Parentheses
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" x-model="lyricOptions.removeEmojis"
+                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            Remove Emojis
+                        </label>
+                    </div>
+
+                    <div class="mt-4 space-y-3">
+                        <label class="flex items-center gap-2 text-sm">
+                            <input type="checkbox" x-model="lyricOptions.smartLineSplit"
+                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            Split Long Lines
+                            <input type="number" x-model="lyricOptions.maxChars" min="20" max="100"
+                                class="w-16 p-1 border border-gray-300 rounded text-xs">
+                            chars
+                        </label>
+
+                        <div class="flex gap-2">
+                            <input type="text" x-model="lyricOptions.findText" placeholder="Find"
+                                class="flex-1 p-2 border border-gray-300 rounded-lg text-sm">
+                            <input type="text" x-model="lyricOptions.replaceText" placeholder="Replace"
+                                class="flex-1 p-2 border border-gray-300 rounded-lg text-sm">
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex justify-between">
+                        <div class="flex gap-2">
+                            <button @click="processLyrics()"
+                                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                Process
+                            </button>
+                            <button @click="undoLyricProcessing()" :disabled="!originalLyrics"
+                                class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                                Undo
+                            </button>
+                        </div>
+                        <button @click="showLyricTidy = false"
+                            class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
